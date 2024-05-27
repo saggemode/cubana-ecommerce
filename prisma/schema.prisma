@@ -1,0 +1,310 @@
+// This is your Prisma schema file,
+// learn more about it in the docs: https://pris.ly/d/prisma-schema
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+  //directUrl = env("DIRECT_URL")
+  // relationMode = "prisma"
+}
+
+enum UserRole {
+  ADMIN
+  USER
+  MODERATOR
+}
+
+enum SessionStatus {
+  ACTIVE
+  COMPLETED
+  EXPIRED
+  FAILED
+}
+
+enum Status {
+  ACTIVE
+  DRAFT
+}
+
+model Account {
+  id                String  @id @default(cuid())
+  userId            String
+  type              String
+  provider          String
+  providerAccountId String
+  refresh_token     String? @db.Text
+  access_token      String? @db.Text
+  expires_at        Int?
+  token_type        String?
+  scope             String?
+  id_token          String? @db.Text
+  session_state     String?
+
+  oauth_token_secret String?
+  oauth_token        String?
+
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@unique([provider, providerAccountId])
+  @@index([userId])
+}
+
+model User {
+  id            String    @id @default(cuid())
+  email         String?   @unique @db.VarChar(255)
+  emailVerified DateTime?
+  phone         String?   @unique @db.VarChar(255)
+  name          String?   @db.VarChar(255)
+  image         String?   @db.Text
+  password      String?   @db.Text
+
+  isBanned Boolean   @default(false)
+  wishlist Product[] @relation("Wishlist")
+  accounts Account[]
+  cart     Cart[]
+  orders   Order[]
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  role                  UserRole               @default(USER)
+  isTwoFactorEnabled    Boolean                @default(false)
+  twoFactorConfirmation TwoFactorConfirmation?
+}
+
+model VerificationToken {
+  id      String   @id @default(cuid())
+  email   String
+  token   String   @unique
+  expires DateTime
+
+  @@unique([email, token])
+}
+
+model PasswordResetToken {
+  id      String   @id @default(cuid())
+  email   String
+  token   String   @unique
+  expires DateTime
+
+  @@unique([email, token])
+}
+
+model TwoFactorToken {
+  id      String   @id @default(cuid())
+  email   String
+  token   String   @unique
+  expires DateTime
+
+  @@unique([email, token])
+}
+
+model TwoFactorConfirmation {
+  id     String @id @default(cuid())
+  userId String
+  user   User   @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@unique([userId])
+}
+
+model Brand {
+  id       String    @id @default(cuid())
+  name     String    @unique
+  products Product[] @relation("BrandToProduct")
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+}
+
+model Banner {
+  id       String @id @default(cuid())
+  label    String
+  imageUrl String
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+}
+
+model Category {
+  id String @id @default(cuid())
+
+  title    String    @unique
+  // description String?
+  products Product[] @relation("CategoryToProduct")
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+}
+
+model Cart {
+  id        String     @id @default(cuid())
+  userId    String     @unique
+  user      User       @relation(fields: [userId], references: [id], onDelete: Cascade)
+  cartItems CartItem[]
+  createdAt DateTime   @default(now())
+  updatedAt DateTime   @updatedAt
+}
+
+model CartItem {
+  id        String  @id @default(cuid())
+  cartId    String
+  productId String
+  quantity  Int
+  cart      Cart    @relation(fields: [cartId], references: [id], onDelete: Cascade)
+  product   Product @relation(fields: [productId], references: [id], onDelete: Cascade)
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+}
+
+model Product {
+  id          String  @id @default(cuid())
+  name        String  @db.VarChar(255)
+  description String? @db.Text
+  images      Image[]
+  slug        String  @db.VarChar(255)
+  price       Int?    @default(0)
+  discount    Int?    @default(0)
+  stock       Int?    @default(0)
+  rating      Int?    @default(0)
+
+  isFeatured Boolean @default(false)
+  isArchived Boolean @default(false)
+
+  orders    OrderItem[]
+  cartItems CartItem[]
+  wishlists User[]      @relation("Wishlist")
+
+  brand   Brand?  @relation("BrandToProduct", fields: [brandId], references: [id])
+  brandId String?
+
+  sizeId String? // Foreign Key to Size
+  size   Size?   @relation(fields: [sizeId], references: [id])
+
+  colorId String? // Foreign Key to Color
+  color   Color?  @relation(fields: [colorId], references: [id])
+
+  categoryId String? // Foreign Key to Category
+  category   Category? @relation("CategoryToProduct", fields: [categoryId], references: [id])
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@index([brandId])
+  @@index([categoryId])
+  @@index([sizeId])
+  @@index([colorId])
+}
+
+model Image {
+  id        String   @id @default(cuid())
+  productId String // Foreign Key to Product
+  product   Product  @relation(fields: [productId], references: [id], onDelete: Cascade)
+  url       String // URL of the image
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@index([productId])
+}
+
+model Color {
+  id String @id @default(cuid())
+
+  name      String
+  value     String
+  products  Product[] // Relation to Product model
+  createdAt DateTime  @default(now())
+  updatedAt DateTime  @updatedAt
+}
+
+model Size {
+  id String @id @default(cuid())
+
+  name      String
+  value     String
+  products  Product[] // Relation to Product model
+  createdAt DateTime  @default(now())
+  updatedAt DateTime  @updatedAt
+}
+
+model Order {
+  id              String  @id @default(cuid())
+  sessionId       String
+  orderNumber     String  @unique
+  idempotencyKey  String?
+  paymentIntentId String  @unique
+  amountTotal     Int
+
+  status OrderStatusEnum @default(Processing)
+  // phone       String          @default("")
+  // isPaid      Boolean         @default(false)
+  // isCompleted Boolean         @default(false)
+  // payable     Float           @default(100)
+  //address     String          @default("")
+
+  orderItem OrderItem[] // Relation to OrderItem model
+
+  userId String
+  user   User   @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  customerInformationId String
+  customerInformation   CustomerInformation @relation(fields: [customerInformationId], references: [id])
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+}
+
+// Intermediary for a many-to-many relationship
+model OrderItem {
+  id       String @id @default(cuid())
+  quantity Int
+
+  orderId String
+  order   Order  @relation(fields: [orderId], references: [id])
+
+  productId String // Foreign Key to Product
+  product   Product @relation(fields: [productId], references: [id])
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@index([orderId])
+  @@index([productId])
+}
+
+model CustomerInformation {
+  id           String   @id @default(cuid())
+  name         String
+  addressLine1 String
+  addressLine2 String
+  city         String
+  state        String
+  // country      String
+  // postalCode   String
+  createdAt    DateTime @default(now())
+  updatedAt    DateTime @updatedAt
+  Order        Order[]
+}
+
+enum OrderStatusEnum {
+  Processing
+  Shipped
+  Delivered
+  ReturnProcessing
+  ReturnCompleted
+  Cancelled
+  RefundProcessing
+  RefundCompleted
+  Denied
+}
+
+enum PaymentStatusEnum {
+  Processing
+  Paid
+  Failed
+  Denied
+}

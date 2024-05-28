@@ -12,11 +12,11 @@ import { MainNav } from "./nav/desktop";
 import { MobileNav } from "./nav/mobile";
 import { ThemeSwitcher } from "@/providers/theme-switcher";
 
-import { useCart } from "@/hooks/use-cart";
+// import { useCart } from "@/hooks/use-cart";
 import useFromStore from "@/hooks/useFromStore";
 
 export const Navbar = () => {
-  const cart = useFromStore(useCart, (state) => state.cart);
+  // const cart = useFromStore(useCart, (state) => state.cart);
 
   const pathname = usePathname();
   const user = useCurrentUser();

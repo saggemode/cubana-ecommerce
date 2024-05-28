@@ -4,18 +4,12 @@ import Image from "next/image";
 import { toast } from "react-hot-toast";
 import { LuX } from "react-icons/lu";
 import { HiMinusSm, HiOutlinePlusSm, HiOutlineTrash } from "react-icons/hi";
-import { useCart } from "@/hooks/use-cart";
+import  useCart  from "@/hooks/use-cart";
 import { Product } from "@/types";
 // import Currency from "@/components/ui/currency";
 import IconButton from "@/components/ui/icon-button";
 import { Card, CardContent, CardHeader } from "@/components/ui/card";
 import Link from "next/link";
-// import {Currency} from "@/lib/utils";
-
-
-// import useCart  from "@/store/cart";
-
-
 
 interface CartItemProps {
   data: Product;
@@ -29,70 +23,10 @@ const CartProduct: React.FC<CartItemProps> = ({ data }) => {
 
   const [quantity, setQuantity] = useState<number | "">(data.quantity ?? "");
 
-  // const onRemove = () => {
-  //   cart.removeItem(data.id);
-  // };
-
-  // const increment2 = () => {
-  //   cart.increaseQuantity(data.id);
-  // };
-
-  const increment = useCart((state) => state.incrementQuantity);
-  const decrement = useCart((state) => state.decrementQuantity);
-  const removeFromCart = useCart((state) => state.removeFromCart);
-
-  const handleIncrement = () => {
-   
-    increment(data.id);
-  };
-
-  const handleDecrement = (item: Product) => {
-
-    decrement(item.id);
-  };
-
-  const handleRemoveFromCart = () => {
-    removeFromCart(data.id);
-  };
-
-
-
-  const handleIncrementQuantity = (itemId: number) => {
-    setTotal((prevCart: any) =>
-      prevCart.map((item: any) => {
-        return item.id === itemId
-          ? { ...item, quantity: item.quantity + 1 }
-          : item;
-      })
-    );
-  };
-
-  // const onRemove = () => {
-  //   cart.removeItem(data.id);
-  // };
-  // const getQuantityById = () => {
-  //   cart.getQuantityById(data.id);
-  // };
 
   React.useEffect(() => {
     setTotal(cart);
   }, [cart]);
-
-  // const increment = () => {
-  //   cart.incrementItem(data.id);
-  // };
-
-  // const increment2 = () => {
-  //   cart.increaseQuantity(data.id);
-  // };
-
-  // const decrement = () => {
-  //   cart.removeItem(data.id);
-  // };
-
-  //const populate = useCart.usePopulate();
-  // const remove = useCart.useRemove();
-  // const update = useCart.useUpdate();
 
   return (
     <Card>

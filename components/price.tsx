@@ -4,7 +4,7 @@ import React from 'react';
 const Price = ({
   amount,
   className,
-  currencyCode = 'USD',
+  currencyCode = 'NGN',
   currencyCodeClassName
 }: {
   amount: string;

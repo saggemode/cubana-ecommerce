@@ -1,25 +1,25 @@
 // import type { Metadata } from "next";
 // import { notFound } from "next/navigation";
 
-import getProductById from "@/actions/getProductById";
-import ClientOnly from "@/components/ClientOnly";
-import EmptyState from "@/components/EmptyState";
+import getProductById from '@/actions/getProductById'
+import ClientOnly from '@/components/ClientOnly'
+import EmptyState from '@/components/EmptyState'
 // import prisma from "@/lib/prisma";
-import Breadcrumbs from "./_components/Breadcrumbs";
-import DataColumn from "./_components/DataColumn";
-import Gallery from "./_components/gallery";
-import Link from "next/link";
-import { GridTileImage } from "@/components/grid/tile";
+import Breadcrumbs from './_components/Breadcrumbs'
+import DataColumn from './_components/DataColumn'
+import Gallery from './_components/gallery'
+import Link from 'next/link'
+import { GridTileImage } from '@/components/grid/tile'
 // import getProducts from "@/actions/getProducts";
-import getRelatedProducts from "@/actions/getRelatedProduct";
+import getRelatedProducts from '@/actions/getRelatedProduct'
 interface IParams {
   params: {
-    productId: string;
-  };
+    productId: string
+  }
 }
 
 const ProductPage: React.FC<IParams> = async ({ params }) => {
-  const product = await getProductById(params);
+  const product = await getProductById(params)
   // const suggestedProducts = await getRelatedProducts({
   //   categoryId: product?.category?.title,
   //   params,
@@ -47,27 +47,29 @@ const ProductPage: React.FC<IParams> = async ({ params }) => {
       <ClientOnly>
         <EmptyState />
       </ClientOnly>
-    );
+    )
   }
 
   return (
     <ClientOnly>
-      <Breadcrumbs product={product} />
-      <div className="mt-6 grid grid-cols-1 gap-2 md:grid-cols-3">
-        <Gallery images={product.images} />
-        <DataColumn product={product} />
+      <div className='mt-12 pt-12'>
+        <Breadcrumbs product={product} />
+        <div className="mt-6 grid grid-cols-1 gap-2 md:grid-cols-3">
+          <Gallery images={product.images} />
+          <DataColumn product={product} />
+        </div>
+        <RelatedProducts productId={product.id} />
       </div>
-      <RelatedProducts productId={product.id} />
     </ClientOnly>
-  );
-};
+  )
+}
 
-export default ProductPage;
+export default ProductPage
 
 async function RelatedProducts({ productId }: { productId: string }) {
-  const relatedProducts = await getRelatedProducts(productId);
+  const relatedProducts = await getRelatedProducts(productId)
 
-  if (!relatedProducts.length) return null;
+  if (!relatedProducts.length) return null
 
   return (
     <div className="py-8">
@@ -87,9 +89,9 @@ async function RelatedProducts({ productId }: { productId: string }) {
                 label={{
                   title: product.name as string,
                   amount:
-                    product.price !== null ? product.price.toString() : "",
+                    product.price !== null ? product.price.toString() : '',
                   currencyCode:
-                    product.price !== null ? product.price.toString() : "",
+                    product.price !== null ? product.price.toString() : '',
                 }}
                 src={product.images?.[0]?.url}
                 fill
@@ -100,5 +102,5 @@ async function RelatedProducts({ productId }: { productId: string }) {
         ))}
       </ul>
     </div>
-  );
+  )
 }

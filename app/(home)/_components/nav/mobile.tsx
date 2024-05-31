@@ -7,6 +7,7 @@ import { docsConfig } from "@/config/docs";
 import Config from "@/config/site";
 import { cn } from "@/lib/utils";
 import { LuView } from "react-icons/lu";
+import { MenuIcon } from 'lucide-react'
 import Link, { LinkProps } from "next/link";
 import { useRouter } from "next/navigation";
 import { useState } from "react";
@@ -21,7 +22,7 @@ export function MobileNav() {
           variant="ghost"
           className="mr-2 px-0 text-base hover:bg-transparent focus-visible:bg-transparent focus-visible:ring-0 focus-visible:ring-offset-0 md:hidden"
         >
-          <LuView className="h-5" />
+          <MenuIcon className="h-5" />
           <span className="sr-only">Toggle Menu</span>
         </Button>
       </SheetTrigger>
@@ -72,7 +73,7 @@ export function MobileNav() {
         </ScrollArea>
       </SheetContent>
     </Sheet>
-  );
+  )
 }
 
 interface MobileLinkProps extends LinkProps {

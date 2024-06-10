@@ -1,4 +1,4 @@
-import Wishlist from '@/pages/wishlist';
+
 import { Product } from '@/types';
 import { useEffect, useState } from 'react';
 import { create } from 'zustand';

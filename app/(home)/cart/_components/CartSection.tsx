@@ -12,18 +12,14 @@ const Cart = () => {
   const router = useRouter()
   // const { user } = useUser()
   const cart = useCart()
+  // const items = useCart.useCartItems
+    const { removeItem, increaseQuantity, decreaseQuantity } = useCart()
 
   const total = cart.cartItems.reduce(
     (acc, cartItem) => acc + (cartItem.item.price ?? 0) * cartItem.quantity,
     0
   )
   const totalRounded = parseFloat(total.toFixed(2))
-
-  // const customer = {
-  //   clerkId: user?.id,
-  //   email: user?.emailAddresses[0].emailAddress,
-  //   name: user?.fullName,
-  // }
 
   const handleCheckout = async () => {
     console.log('hello checkout')
@@ -69,12 +65,12 @@ const Cart = () => {
                   />
                   <div className="flex flex-col gap-3 ml-4">
                     <p className="text-body-bold">{cartItem.item.name}</p>
-                    {cartItem.color && (
+                    {/* {cartItem.color && (
                       <p className="text-small-medium">{cartItem.color}</p>
                     )}
                     {cartItem.size && (
                       <p className="text-small-medium">{cartItem.size}</p>
-                    )}
+                    )} */}
                     {/* <p className="text-small-medium">${cartItem.item.price}</p> */}
 
                     <p>
@@ -92,18 +88,18 @@ const Cart = () => {
                 <div className="flex gap-4 items-center">
                   <MinusCircle
                     className="hover:text-red-1 cursor-pointer"
-                    onClick={() => cart.decreaseQuantity(cartItem.item.id)}
+                    onClick={() => decreaseQuantity(cartItem.item.id)}
                   />
                   <p className="text-body-bold">{cartItem.quantity}</p>
                   <PlusCircle
                     className="hover:text-red-1 cursor-pointer"
-                    onClick={() => cart.increaseQuantity(cartItem.item.id)}
+                    onClick={() => increaseQuantity(cartItem.item.id)}
                   />
                 </div>
 
                 <Trash
                   className="hover:text-red-1 cursor-pointer"
-                  onClick={() => cart.removeItem(cartItem.item.id)}
+                  onClick={() => removeItem(cartItem.item.id)}
                 />
               </div>
             ))}

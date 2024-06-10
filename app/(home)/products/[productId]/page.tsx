@@ -1,17 +1,15 @@
-// import type { Metadata } from "next";
-// import { notFound } from "next/navigation";
-
 import getProductById from '@/actions/getProductById'
 import ClientOnly from '@/components/ClientOnly'
 import EmptyState from '@/components/EmptyState'
-// import prisma from "@/lib/prisma";
 import Breadcrumbs from './_components/Breadcrumbs'
 import DataColumn from './_components/DataColumn'
 import Gallery from './_components/gallery'
 import Link from 'next/link'
 import { GridTileImage } from '@/components/grid/tile'
-// import getProducts from "@/actions/getProducts";
 import getRelatedProducts from '@/actions/getRelatedProduct'
+import CartButton from './_components/CartButton'
+import ProductCart from './_components/ProductCart'
+
 interface IParams {
   params: {
     productId: string
@@ -20,27 +18,6 @@ interface IParams {
 
 const ProductPage: React.FC<IParams> = async ({ params }) => {
   const product = await getProductById(params)
-  // const suggestedProducts = await getRelatedProducts({
-  //   categoryId: product?.category?.title,
-  //   params,
-  // });
-
-  // const productId = parseInt(params.productId, 10);
-
-  // const product = await prisma.product.findUnique({
-  //   where: {
-  //     id: params.productId,
-  //   },
-  //   include: {
-  //     category: true,
-  //     size: true,
-  //     brand: true,
-  //     color: true,
-  //     images: true,
-  //   },
-  // });
-
-  // const urlString = product?.images;
 
   if (!product) {
     return (
@@ -52,11 +29,12 @@ const ProductPage: React.FC<IParams> = async ({ params }) => {
 
   return (
     <ClientOnly>
-      <div className='mt-12 pt-12'>
+      <div className="mt-12 pt-12">
         <Breadcrumbs product={product} />
         <div className="mt-6 grid grid-cols-1 gap-2 md:grid-cols-3">
           <Gallery images={product.images} />
           <DataColumn product={product} />
+          <ProductCart product={product} />
         </div>
         <RelatedProducts productId={product.id} />
       </div>

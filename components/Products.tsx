@@ -12,6 +12,7 @@ interface ProductListProps {
 }
 
 export const ProductGrid: React.FC<ProductListProps> = ({ items }) => {
+  
   return (
     <div className="space-y-4">
       {items.length === 0 && <NoResults />}

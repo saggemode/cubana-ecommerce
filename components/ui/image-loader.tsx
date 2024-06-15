@@ -1,17 +1,19 @@
-import { useState } from 'react';
-import Image from 'next/image';
-import cn from 'clsx';
-import type { ReactNode } from 'react';
+import { useState, MouseEventHandler } from 'react'
+
+import Image from 'next/image'
+import cn from 'clsx'
+import type { ReactNode } from 'react'
 
 type ImageLoaderProps = {
-  src: string;
-  alt: string;
-  divStyle: string;
-  imageStyle?: string;
-  objectFit?: 'fill' | 'contain' | 'cover' | 'none' | 'scale-down';
-  draggable?: boolean;
-  children?: ReactNode;
-};
+  src: string
+  alt: string
+  divStyle: string
+  imageStyle?: string
+  objectFit?: 'fill' | 'contain' | 'cover' | 'none' | 'scale-down'
+  draggable?: boolean
+  children?: ReactNode
+  onClick?: MouseEventHandler<HTMLImageElement>
+}
 
 export function ImageLoader({
   src,
@@ -20,11 +22,12 @@ export function ImageLoader({
   children,
   objectFit,
   draggable,
-  imageStyle
+  imageStyle,
+  onClick,
 }: ImageLoaderProps): JSX.Element {
-  const [isLoading, setIsLoading] = useState(true);
+  const [isLoading, setIsLoading] = useState(true)
 
-  const handleLoad = (): void => setIsLoading(false);
+  const handleLoad = (): void => setIsLoading(false)
 
   return (
     <div
@@ -40,10 +43,11 @@ export function ImageLoader({
         alt={alt}
         draggable={draggable}
         objectFit={objectFit}
-        layout='fill'
+        layout="fill"
+        onClick={onClick}
         onLoadingComplete={handleLoad}
       />
       {children}
     </div>
-  );
+  )
 }

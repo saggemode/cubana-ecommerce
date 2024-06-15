@@ -7,7 +7,7 @@ import { currentRole } from "@/lib/auth";
 // import { DescriptionForm } from "../_components/description-form";
 // import { PriceForm } from "../_components/price-form";
 // import { ImageForm } from "../_components/image-form";
-import { ProductForm } from "../_components/product-form";
+import { ProductForm } from "../_components/product-form 1";
 import { ScrollArea } from "@/components/ui/scroll-area";
 
 const ProductIdPage = async ({ params }: { params: { productId: string } }) => {

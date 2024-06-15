@@ -34,6 +34,10 @@ const ProductCardHome: React.FC<ProductCardProps> = ({ productData }) => {
   const existItem =
     cart && cart.cartItems.find((x) => x.item.id === productData.id)
 
+  const handleClick = () => {
+    router.push(`/products/${productData?.id}`)
+  }
+
   //    const [productQuantity, setProductQuantity] = useState(0)
 
   //    useEffect(() => {
@@ -62,11 +66,11 @@ const ProductCardHome: React.FC<ProductCardProps> = ({ productData }) => {
   //    }
 
   return (
-    <Link href={`/products/${productData.id}`} scroll={false} legacyBehavior>
-      <a
+    <>
+      {/* <Link href={`/products/${productData.id}`} scroll={false} legacyBehavior> */}
+      <div
         className="tab group relative rounded-lg ring-2 ring-border-primary
                    transition duration-300 hover:ring hover:ring-accent"
-        onClick={delayScroll}
       >
         <div className="transition duration-300 group-hover:brightness-90 group-focus-visible:brightness-90">
           <ImageLoader
@@ -75,9 +79,10 @@ const ProductCardHome: React.FC<ProductCardProps> = ({ productData }) => {
             src={productData.images?.[0]?.url}
             alt={productData.name}
             objectFit="fill"
+            onClick={handleClick}
           />
         </div>
-        <div className="flex flex-col gap-1 p-2">
+        <div className="flex flex-col gap-1 p-2" onClick={handleClick}>
           <div>
             <p
               className="overflow-hidden text-ellipsis [display:-webkit-box]
@@ -87,7 +92,7 @@ const ProductCardHome: React.FC<ProductCardProps> = ({ productData }) => {
             </p>
             <p className="font-bold">
               {' '}
-              {productData?.isFeatured != false ? (
+              {productData?.isFeatured ? (
                 <Price
                   amount={
                     productData?.price !== null
@@ -136,7 +141,7 @@ const ProductCardHome: React.FC<ProductCardProps> = ({ productData }) => {
             <Button
               className="w-full"
               type="button"
-              disabled={isPending}
+              disabled={isPending || !productData?.isFeatured}
               onClick={() => {
                 startTransition(async () => {
                   const res = await cart.addItem({
@@ -167,8 +172,8 @@ const ProductCardHome: React.FC<ProductCardProps> = ({ productData }) => {
             onClick={handleClick}
           /> */}
         </div>
-      </a>
-    </Link>
+      </div>
+    </>
   )
 }
 

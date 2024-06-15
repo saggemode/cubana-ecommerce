@@ -1,17 +1,11 @@
-import prisma from "@/lib/prisma";
-import { redirect } from "next/navigation";
-import { currentRole } from "@/lib/auth";
-
-// import { Actions } from "../_components/actions";
-// import { TitleForm } from "../_components/title-form";
-// import { DescriptionForm } from "../_components/description-form";
-// import { PriceForm } from "../_components/price-form";
-// import { ImageForm } from "../_components/image-form";
-import { ProductForm } from "../_components/product-form";
-import { ScrollArea } from "@/components/ui/scroll-area";
+import prisma from '@/lib/prisma'
+import { redirect } from 'next/navigation'
+import { currentRole } from '@/lib/auth'
+import { ProductForm } from '../_components/product-form'
+import { ScrollArea } from '@/components/ui/scroll-area'
 
 const ProductIdPage = async ({ params }: { params: { productId: string } }) => {
-  const role = await currentRole();
+  const role = await currentRole()
 
   const product = await prisma.product.findUnique({
     where: {
@@ -20,37 +14,37 @@ const ProductIdPage = async ({ params }: { params: { productId: string } }) => {
     include: {
       images: true,
     },
-  });
+  })
 
   const categories = await prisma.category.findMany({
     // where: {
     //   id: params.productId,
     // },
     orderBy: {
-      title: "asc",
+      title: 'asc',
     },
-  });
+  })
 
   const sizes = await prisma.size.findMany({
     orderBy: {
-      name: "asc",
+      name: 'asc',
     },
-  });
+  })
 
   const colors = await prisma.color.findMany({
     orderBy: {
-      name: "asc",
+      name: 'asc',
     },
-  });
+  })
 
   const brands = await prisma.brand.findMany({
     orderBy: {
-      name: "asc",
+      name: 'asc',
     },
-  });
+  })
 
   if (!product) {
-    return redirect("/");
+    return redirect('/')
   }
 
   return (
@@ -70,7 +64,7 @@ const ProductIdPage = async ({ params }: { params: { productId: string } }) => {
         </div>
       </ScrollArea>
     </>
-  );
-};
+  )
+}
 
-export default ProductIdPage;
+export default ProductIdPage

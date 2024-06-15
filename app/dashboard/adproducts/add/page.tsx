@@ -1,31 +1,31 @@
-import React from "react";
-import prisma from "@/lib/prisma";
-import { ProductForm } from "../_components/product-form";
+import React from 'react'
+import prisma from '@/lib/prisma'
+import { ProductForm } from '../_components/product-form 1'
 
 const AddProductPage = async () => {
   const categories = await prisma.category.findMany({
     orderBy: {
-      title: "asc",
+      title: 'asc',
     },
-  });
+  })
 
   const sizes = await prisma.size.findMany({
     orderBy: {
-      name: "asc",
+      name: 'asc',
     },
-  });
+  })
 
   const colors = await prisma.color.findMany({
     orderBy: {
-      name: "asc",
+      name: 'asc',
     },
-  });
+  })
 
   const brands = await prisma.brand.findMany({
     orderBy: {
-      name: "asc",
+      name: 'asc',
     },
-  });
+  })
 
   return (
     <div className="h-full ">
@@ -34,9 +34,10 @@ const AddProductPage = async () => {
         colors={colors}
         sizes={sizes}
         brands={brands}
+        type="Create"
       />
     </div>
-  );
-};
+  )
+}
 
-export default AddProductPage;
+export default AddProductPage

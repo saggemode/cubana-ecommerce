@@ -40,6 +40,13 @@ interface CartStore {
   populate: (items: Product[], total: number) => void
   getQuantityById: (id: string) => number | undefined // New metho
   getTotalAmount: () => number // New method
+
+  paymentIntent: string
+  setPaymentIntent: (value: string) => void
+
+  toggleCart: () => void
+
+  isOpen: boolean
 }
 
 const calcPrice = (items: CartItem[]) => {
@@ -62,6 +69,7 @@ const calcPrice = (items: CartItem[]) => {
 const useCartStoreBase = create(
   persist<CartStore>(
     (set, get) => ({
+      isOpen: false,
       cartItems: [],
       totalPrice: 0,
       total: 0,
@@ -86,6 +94,9 @@ const useCartStoreBase = create(
 
       // },
 
+      paymentIntent: '',
+      setPaymentIntent: (value) => set({ paymentIntent: value }),
+      toggleCart: () => set((state) => ({ ...state, isOpen: !state.isOpen })),
       addItem: async (data: CartItem) => {
         const { item, quantity, color, size } = data
         const currentItems = get().cartItems
@@ -125,10 +136,10 @@ const useCartStoreBase = create(
         set({ cartItems: newCartItems })
         set({ ...calcPrice(newCartItems) })
         //toast.success('Item quantity increased')
-         return { success: true, message: 'Item quantity increased' }
+        return { success: true, message: 'Item quantity increased' }
       },
 
-      decreaseQuantity: async(idToDecrease: string) => {
+      decreaseQuantity: async (idToDecrease: string) => {
         const newCartItems = get().cartItems.map((cartItem) =>
           cartItem.item.id === idToDecrease && cartItem.quantity > 1
             ? { ...cartItem, quantity: cartItem.quantity - 1 }
@@ -137,7 +148,7 @@ const useCartStoreBase = create(
         set({ cartItems: newCartItems })
         set({ ...calcPrice(newCartItems) })
         // toast.success('Item quantity decreased')
-         return { success: true, message: 'Item quantity decreased' }
+        return { success: true, message: 'Item quantity decreased' }
       },
 
       // this is the testing type
@@ -192,7 +203,7 @@ const useCartStoreBase = create(
         return get().cartItems.length
       },
 
-      clearCart: () => set({ cartItems: [] }),
+      clearCart: () => set({ cartItems: [], paymentIntent: '' }),
     }),
     {
       name: 'cart-storage',

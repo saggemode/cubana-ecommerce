@@ -1,202 +1,177 @@
-"use client";
+'use client'
 
-import * as z from "zod";
-import axios from "axios";
-import { zodResolver } from "@hookform/resolvers/zod";
-import { useForm } from "react-hook-form";
-import { toast } from "react-hot-toast";
-import { LuTrash } from "react-icons/lu";
-import { Category, Color, Image, Product, Size, Brand } from "@prisma/client";
-import { useParams, useRouter } from "next/navigation";
-import { ScrollArea } from "@/components/ui/scroll-area";
-
-import { Button } from "@/components/ui/button";
+import * as z from 'zod'
+import { useState, useTransition } from 'react'
+import { useForm } from 'react-hook-form'
+import { Textarea } from '@/components/ui/textarea'
+import ImageUpload from '@/components/ui/image-upload'
+import { Checkbox } from '@/components/ui/checkbox'
+import Heading from '@/components/Heading'
+import { InputForm } from '@/components/ui/input-form'
+import { zodResolver } from '@hookform/resolvers/zod'
+import { useToast } from '@/components/ui/use-toast'
+import { ScrollArea } from '@/components/ui/scroll-area'
+import { Category, Color, Image, Product, Size, Brand } from '@prisma/client'
+import {
+  ProductSchema,
+  productActionSchema,
+  updateProductActionSchema,
+} from '@/schemas'
 import {
   Form,
   FormControl,
+  FormDescription,
   FormField,
   FormItem,
   FormLabel,
   FormMessage,
-  FormDescription,
-} from "@/components/ui/form";
-import { Separator } from "@/components/ui/separator";
-import { AlertModal } from "@/components/modals/alert-modal";
+} from '@/components/ui/form'
 import {
   Select,
   SelectContent,
   SelectItem,
   SelectTrigger,
   SelectValue,
-} from "@/components/ui/select";
-import { Textarea } from "@/components/ui/textarea";
-import ImageUpload from "@/components/ui/image-upload";
-import { Checkbox } from "@/components/ui/checkbox";
-import Heading from "@/components/Heading";
-import { ProductSchema } from "@/schemas";
-import { InputForm } from "@/components/ui/input-form";
-
-import { useTransition, useState } from "react";
-import { useToast } from "@/components/ui/use-toast";
-import { createProduct } from "@/actions/admins/services/productService";
-import { SubmitButton } from "@/components/auth/SubmitButton";
+} from '@/components/ui/select'
+import { CardWrapper } from '@/components/auth/card-wrapper'
+import { Button } from '@/components/ui/button'
+import { FormError } from '@/components/form-error'
+import { FormSuccess } from '@/components/form-success'
+import ProductService, {
+  ProductWithVariants,
+} from '@/actions/admins/services/productService'
+import { addProduct, updateProduct } from '@/actions/admins/actions/products'
+import { addProductAction } from '@/actions/admins/actions/product'
+import { useRouter } from 'next/navigation'
 
 type ProductFormProps = {
-  product?: Product & {
-    images: Image[];
-  };
-  categories: Category[];
-  colors: Color[];
-  sizes: Size[];
-  brands: Brand[];
-  asEdit?: boolean;
-};
+  categories: Category[]
+  colors: Color[]
+  sizes: Size[]
+  brands: Brand[]
 
-const defaultValues = {
-  name: "",
-  description: "",
-  images: [],
+  type: 'Create' | 'Update'
+  product?:
+    | (ProductWithVariants & {
+        images: Image[]
+      })
+    | null
+  productId?: string
+}
+
+// const productDefaultValues = {
+//   name: '',
+//   description: '',
+//   images: [],
+//   price: 0,
+//   discount: 0,
+//   stock: 0,
+//   categoryId: '',
+//   colorId: '',
+//   sizeId: '',
+//   brandId: '',
+//   isFeatured: false,
+// }
+
+const productDefaultValues = {
+  name: '',
+  description: '',
+  images: [] as { url: string }[],
   price: 0,
   discount: 0,
   stock: 0,
-  categoryId: "",
-  colorId: "",
-  sizeId: "",
-  brandId: "",
-  // isFeatured: false,
-  // isArchived: false,
-};
+  categoryId: '',
+  colorId: '',
+  sizeId: '',
+  brandId: '',
+  isFeatured: false,
+  isArchived: false,
+}
 
-export const ProductForm = ({
-  asEdit,
-  product,
+export const ProductForm: React.FC<ProductFormProps> = ({
   categories,
   sizes,
   colors,
   brands,
-}: ProductFormProps) => {
-  const [error, setError] = useState<string | undefined>("");
-  const [success, setSuccess] = useState<string | undefined>("");
-  const [isPending, startTransition] = useTransition();
-  const action = asEdit ? "Modify the product" : "Add the product";
 
+  type,
+  product,
+  productId,
+}) => {
+  const [error, setError] = useState<string | undefined>('')
+  const [success, setSuccess] = useState<string | undefined>('')
+  const [isPending, startTransition] = useTransition()
+    const { toast } = useToast()
+     const router = useRouter()
 
-  const [open, setOpen] = useState(false);
-  const { toast } = useToast();
-  const router = useRouter();
+  // const form = useForm<z.infer<typeof ProductSchema>>({
+  //   resolver: zodResolver(ProductSchema),
+  //   defaultValues: {
+  //     name: '',
+  //     description: '',
+  //     images: [],
+  //     price: 0,
+  //     discount: 0,
+  //     stock: 0,
+  //     categoryId: '',
+  //     colorId: '',
+  //     sizeId: '',
+  //     brandId: '',
+  //     isFeatured: false,
+  //     isArchived: false,
+  //   },
+  // })
 
-  const params = useParams();
-  const [loading, setLoading] = useState(false);
-
-  const form = useForm<z.infer<typeof ProductSchema>>({
-    resolver: zodResolver(ProductSchema),
+  const form = useForm<z.infer<typeof productActionSchema>>({
+    resolver:
+      type === 'Update'
+        ? zodResolver(updateProductActionSchema)
+        : zodResolver(productActionSchema),
     defaultValues:
-      asEdit && product
+      product && type === 'Update'
         ? {
-            name: product.name,
-            description: String(product?.description || "No Description"),
+            ...product,
             price: parseFloat(String(product?.price)),
-            categoryId: String(product?.categoryId || ""),
-            brandId: String(product?.brandId || ""),
-            sizeId: String(product?.sizeId || ""),
-            colorId: String(product?.colorId || ""),
+            description: String(product?.description || 'No Description'),
+            categoryId: String(product?.categoryId || ''),
+            brandId: String(product?.brandId || ''),
+            sizeId: String(product?.sizeId || ''),
+            colorId: String(product?.colorId || ''),
             discount: parseFloat(String(product?.discount?.toFixed(2))),
             stock: parseFloat(String(product?.stock?.toFixed(2))),
           }
-        : defaultValues,
-  });
+        : productDefaultValues,
+  })
 
-  const onSubmit = async (values: z.infer<typeof ProductSchema>) => {
-    startTransition(async () => {
 
-      createProduct(values)
-      .then((data:any) => {
-        setError(data.error);
-        setSuccess(data.success);
-      });
-      // const addProductValues = {
-      //   name: values.name,
-      //   description: values.description,
-      //   price: values.price,
-      //   stock: values.stock,
-      //   discount: values.discount,
-      // };
-
-      // if (asEdit && product) {
-      //   const updateProductValues = {
-      //     ...addProductValues,
-      //     id: product.id,
-      //   };
-
-      //   //await updateProduct(updateProductValues);
-      // } else {
-      //   // context?.setOptimisticProduct(addProductValues);
-      //   // await addProduct(addProductValues);
-
-      //   // createProduct(values).then((data: any) => {
-      //   //   setError(data.error);
-      //   //   setSuccess(data.success);
-      //   // });
-
-      //   const result = await createProduct(values);
-      //   if (result.error) {
-      //     setError(result.error);
-      //   } else {
-      //     setSuccess(result.success);
-      //     // Clear the form after successful submission
-      //     form.reset();
-      //   }
-      // }
-
-   
-
-    //   toast({
-    //     title: asEdit ? "Product modified" : "Product added",
-    //     description: asEdit
-    //       ? "Product successfully modified"
-    //       : "Product successfully added",
-    //   });
-     });
-  };
-
-  const onDelete = async () => {
-    try {
-      setLoading(true);
-      await axios.delete(`/api/products/${params.productId}`);
-      router.refresh();
-      router.push(`/dashboard/products`);
-     // toast.success("Product deleted.");
-    } catch (error: any) {
-      //toast.error("Something went wrong.");
-    } finally {
-      setLoading(false);
-      setOpen(false);
+  const onSubmit = async(values: z.infer<typeof ProductSchema>) => {
+    if (type === 'Create') {
+      const res = await addProduct(values)
+     toast({
+       title: product ? 'Product modified' : 'Product added',
+       description: product
+         ? 'Product successfully modified'
+         : 'Product successfully added',
+     })
     }
-  };
+    if (type === 'Update') {
+      if (!productId) {
+        router.push(`/admin/products`)
+        return
+      }
+      const res = await updateProduct({ ...values, id: productId })
+      toast({
+        title: product ? 'Product modified' : 'Product added',
+        description: product
+          ? 'Product successfully modified'
+          : 'Product successfully added',
+      })
+    }
+  }
 
   return (
     <ScrollArea className="h-full">
       <div className="flex-1 space-y-4 p-4 md:p-8 pt-6">
-        <AlertModal
-          isOpen={open}
-          onClose={() => setOpen(false)}
-          onConfirm={onDelete}
-          loading={loading}
-        />
-        <div className="flex items-center justify-between">
-          <Heading title={"title"} subtitle={"description"} />
-          {/* {initialData && (
-            <Button
-              disabled={loading}
-              variant="destructive"
-              size="sm"
-              onClick={() => setOpen(true)}
-            >
-              <LuTrash className="h-4 w-4" />
-            </Button>
-          )} */}
-        </div>
-        <Separator />
         <Form {...form}>
           <form
             onSubmit={form.handleSubmit(onSubmit)}
@@ -238,17 +213,13 @@ export const ProductForm = ({
               )}
             />
 
-              <SubmitButton pending={isPending}>
-              {asEdit ? "Modify the product" : "Add the product"}
-            </SubmitButton>
-
             <div className="md:grid md:grid-cols-3 gap-8">
               <InputForm
                 control={form.control}
                 name="name"
                 label="Name"
                 placeholder="Product Name"
-                disabled={loading}
+                disabled={isPending}
               />
 
               <InputForm
@@ -257,7 +228,7 @@ export const ProductForm = ({
                 label="Price"
                 placeholder="9.99"
                 type="number"
-                disabled={loading}
+                disabled={isPending}
               />
 
               <InputForm
@@ -266,7 +237,7 @@ export const ProductForm = ({
                 label="Discount"
                 placeholder="9.99"
                 type="number"
-                disabled={loading}
+                disabled={isPending}
               />
 
               <InputForm
@@ -275,7 +246,7 @@ export const ProductForm = ({
                 label="Stock"
                 placeholder="10"
                 type="number"
-                disabled={loading}
+                disabled={isPending}
               />
 
               <FormField
@@ -302,7 +273,7 @@ export const ProductForm = ({
                   <FormItem>
                     <FormLabel>Category</FormLabel>
                     <Select
-                      disabled={loading}
+                      disabled={isPending}
                       onValueChange={field.onChange}
                       value={field.value}
                       defaultValue={field.value}
@@ -335,7 +306,7 @@ export const ProductForm = ({
                   <FormItem>
                     <FormLabel>Size</FormLabel>
                     <Select
-                      disabled={loading}
+                      disabled={isPending}
                       onValueChange={field.onChange}
                       value={field.value}
                       defaultValue={field.value}
@@ -368,7 +339,7 @@ export const ProductForm = ({
                   <FormItem>
                     <FormLabel>Color</FormLabel>
                     <Select
-                      disabled={loading}
+                      disabled={isPending}
                       onValueChange={field.onChange}
                       value={field.value}
                       defaultValue={field.value}
@@ -401,7 +372,7 @@ export const ProductForm = ({
                   <FormItem>
                     <FormLabel>Color</FormLabel>
                     <Select
-                      disabled={loading}
+                      disabled={isPending}
                       onValueChange={field.onChange}
                       value={field.value}
                       defaultValue={field.value}
@@ -471,15 +442,15 @@ export const ProductForm = ({
                 )}
               />
             </div>
-            {/* <Button disabled={isPending} className="ml-auto" type="submit">
-              {action}
-            </Button> */}
-            <SubmitButton pending={isPending}>
-              {asEdit ? "Modify the product" : "Add the product"}
-            </SubmitButton>
+
+            <FormError message={error} />
+            <FormSuccess message={success} />
+            <Button  type="submit" className="ml-auto">
+              Create an Product
+            </Button>
           </form>
         </Form>
       </div>
     </ScrollArea>
-  );
-};
+  )
+}

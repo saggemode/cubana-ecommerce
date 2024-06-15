@@ -62,11 +62,14 @@ model User {
   image         String?   @db.Text
   password      String?   @db.Text
 
-  isBanned Boolean   @default(false)
-  wishlist Product[] @relation("Wishlist")
-  accounts Account[]
-  cart     Cart[]
-  orders   Order[]
+  isBanned         Boolean   @default(false)
+  wishlist         Product[] @relation("Wishlist")
+  accounts         Account[]
+  cart             Cart[]
+  orders           Order[]
+  stripeCustomerId String?
+   address        Json?
+  paymentMethod  String?
 
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
@@ -240,12 +243,17 @@ model Order {
   amountTotal     Int
 
   status OrderStatusEnum @default(Processing)
-  // phone       String          @default("")
-  // isPaid      Boolean         @default(false)
-  // isCompleted Boolean         @default(false)
-  // payable     Float           @default(100)
-  //address     String          @default("")
-
+ shippingAddress Json
+  paymentMethod   String
+  paymentResult   Json?
+  itemsPrice      Decimal
+  shippingPrice   Decimal
+  taxPrice        Decimal
+  totalPrice      Decimal
+  isPaid          Boolean         @default(false)
+  paidAt          DateTime?
+  isDelivered     Boolean         @default(false)
+  deliveredAt     DateTime?
   orderItem OrderItem[] // Relation to OrderItem model
 
   userId String

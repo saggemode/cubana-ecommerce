@@ -8,7 +8,7 @@ import { ProductColumn } from './_components/columns'
 const page = async () => {
   const breadcrumbItems = [
     { title: 'Products', link: '/dashboard/products' },
-    { title: 'Create', link: '/dashboard/products/new' },
+    { title: 'Create', link: '/dashboard/products/create' },
   ]
   const products = await prisma.product.findMany({
     include: {

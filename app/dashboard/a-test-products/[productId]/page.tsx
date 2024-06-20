@@ -5,6 +5,7 @@ import { ProductForm } from '../_components/product-form'
 import { ScrollArea } from '@/components/ui/scroll-area'
 
 const ProductIdPage = async ({ params }: { params: { productId: string } }) => {
+  const role = await currentRole()
 
   const product = await prisma.product.findUnique({
     where: {

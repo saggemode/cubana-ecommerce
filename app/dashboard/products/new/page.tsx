@@ -1,6 +1,6 @@
 import React from 'react'
 import prisma from '@/lib/prisma'
-import { ProductForm } from '../_components/product-form 1'
+import { ProductForm } from '../_components/product-form'
 
 const AddProductPage = async () => {
   const categories = await prisma.category.findMany({
@@ -28,13 +28,12 @@ const AddProductPage = async () => {
   })
 
   return (
-    <div className="h-full ">
+    <div className="h-full">
       <ProductForm
         categories={categories}
         colors={colors}
         sizes={sizes}
         brands={brands}
-        type="Create"
       />
     </div>
   )

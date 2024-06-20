@@ -36,10 +36,11 @@ import { Checkbox } from '@/components/ui/checkbox'
 import Heading from '@/components/Heading'
 import { ProductSchema } from '@/schemas'
 import { InputForm } from '@/components/ui/input-form'
+import { ProductWithVariants } from '@/actions/admins/services/productService'
 
 interface ProductFormProps {
   initialData?:
-    | (Product & {
+    | (ProductWithVariants & {
         images: Image[]
       })
     | null
@@ -56,7 +57,6 @@ export const ProductForm: React.FC<ProductFormProps> = ({
   sizes,
   colors,
   brands,
-
   productId,
 }) => {
   const params = useParams()
@@ -93,13 +93,34 @@ export const ProductForm: React.FC<ProductFormProps> = ({
         colorId: '',
         sizeId: '',
         brandId: '',
-        isFeatured: false,
-        isArchived: false,
       }
 
   const form = useForm<z.infer<typeof ProductSchema>>({
     resolver: zodResolver(ProductSchema),
-    defaultValues,
+    defaultValues: initialData
+      ? {
+          ...initialData,
+          price: parseFloat(String(initialData?.price)),
+          description: String(initialData?.description || 'No Description'),
+          categoryId: String(initialData?.categoryId || ''),
+          brandId: String(initialData?.brandId || ''),
+          sizeId: String(initialData?.sizeId || ''),
+          colorId: String(initialData?.colorId || ''),
+          discount: parseFloat(String(initialData?.discount?.toFixed(2))),
+          stock: parseFloat(String(initialData?.stock?.toFixed(2))),
+        }
+      : {
+          name: '',
+          description: '',
+          images: [],
+          price: 0,
+          discount: 0,
+          stock: 0,
+          categoryId: '',
+          colorId: '',
+          sizeId: '',
+          brandId: '',
+        },
   })
 
   const onSubmit = async (values: z.infer<typeof ProductSchema>) => {
@@ -109,6 +130,7 @@ export const ProductForm: React.FC<ProductFormProps> = ({
         await axios.patch(`/api/products/${productId}`, values)
       } else {
         await axios.post(`/api/products`, values)
+        console.log('clicked')
       }
       router.refresh()
       router.push(`/dashboard/products`)
@@ -242,7 +264,7 @@ export const ProductForm: React.FC<ProductFormProps> = ({
                   <FormItem>
                     <FormControl>
                       <Textarea
-                        disabled={loading}
+                        // disabled={isSubmitting}
                         placeholder="e.g. 'This course is about...'"
                         {...field}
                       />
@@ -356,7 +378,7 @@ export const ProductForm: React.FC<ProductFormProps> = ({
                 name="brandId"
                 render={({ field }) => (
                   <FormItem>
-                    <FormLabel>Brand</FormLabel>
+                    <FormLabel>Color</FormLabel>
                     <Select
                       disabled={loading}
                       onValueChange={field.onChange}
@@ -428,9 +450,12 @@ export const ProductForm: React.FC<ProductFormProps> = ({
                 )}
               />
             </div>
-            <Button disabled={loading} className="ml-auto" type="submit">
-              {action}
+            <Button type="submit" className="bg-blue-1 text-white">
+              Submit
             </Button>
+            {/* <Button disabled={loading} className="ml-auto" type="submit">
+              {action}
+            </Button> */}
           </form>
         </Form>
       </div>

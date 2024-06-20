@@ -125,7 +125,7 @@ const ACCEPTED_IMAGE_TYPES = [
 ];
 export const ProductSchema = z.object({
   name: z.string().min(1),
-  slug: z.string().min(1),
+  slug: z.string().optional(),
   stock: z.coerce.number().min(1),
   description: z.string().min(1),
   discount: z.coerce.number().optional(),
@@ -137,7 +137,7 @@ export const ProductSchema = z.object({
   sizeId: z.string().min(1),
   isFeatured: z.boolean().default(false).optional(),
   isArchived: z.boolean().default(false).optional(),
-});
+})
 
 export const productActionSchema = z.object({
   ...ProductSchema.shape, // Spread all fields from ProductSchema

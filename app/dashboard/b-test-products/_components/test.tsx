@@ -2,7 +2,6 @@
 
 import * as z from 'zod'
 import axios from 'axios'
-import { useState } from 'react'
 import { zodResolver } from '@hookform/resolvers/zod'
 import { useForm } from 'react-hook-form'
 import { toast } from 'react-hot-toast'
@@ -37,9 +36,23 @@ import Heading from '@/components/Heading'
 import { ProductSchema } from '@/schemas'
 import { InputForm } from '@/components/ui/input-form'
 
-interface ProductFormProps {
-  initialData?:
-    | (Product & {
+import { useTransition, useState } from 'react'
+import { useToast } from '@/components/ui/use-toast'
+//import { createProduct } from '@/actions/admins/services/productService'
+import { SubmitButton } from '@/components/auth/SubmitButton'
+
+import ProductService, {
+  ProductWithVariants,
+} from '@/actions/admins/services/productService'
+import { addProduct, updateProduct } from '@/actions/admins/actions/products'
+import { addProductAction } from '@/actions/admins/actions/product'
+
+type ProductFormProps = {
+  // product?: ProductWithVariants & {
+  //   images: Image[]
+  // }
+  product?:
+    | (ProductWithVariants & {
         images: Image[]
       })
     | null
@@ -47,77 +60,98 @@ interface ProductFormProps {
   colors: Color[]
   sizes: Size[]
   brands: Brand[]
-  productId?: string
+  asEdit?: boolean
 }
 
-export const ProductForm: React.FC<ProductFormProps> = ({
-  initialData,
+const defaultValues = {
+  name: '',
+  description: '',
+  images: [],
+  price: 0,
+  discount: 0,
+  stock: 0,
+  categoryId: '',
+  colorId: '',
+  sizeId: '',
+  brandId: '',
+  // isFeatured: false,
+  // isArchived: false,
+}
+
+export const ProductForm = ({
+  asEdit,
+  product,
   categories,
   sizes,
   colors,
   brands,
-
-  productId,
-}) => {
-  const params = useParams()
-  const router = useRouter()
+}: ProductFormProps) => {
+  const [error, setError] = useState<string | undefined>('')
+  const [success, setSuccess] = useState<string | undefined>('')
+  const [isPending, startTransition] = useTransition()
+  const action = asEdit ? 'Modify the product' : 'Add the product'
 
   const [open, setOpen] = useState(false)
+  const { toast } = useToast()
+  const router = useRouter()
+
+  const params = useParams()
   const [loading, setLoading] = useState(false)
-
-  const title = initialData ? 'Edit product' : 'Create product'
-  const description = initialData ? 'Edit a product.' : 'Add a new product'
-  const toastMessage = initialData ? 'Product updated.' : 'Product created.'
-  const action = initialData ? 'Save changes' : 'Create'
-
-  const defaultValues = initialData
-    ? {
-        ...initialData,
-        price: parseFloat(String(initialData?.price)),
-        description: String(initialData?.description || 'No Description'),
-        categoryId: String(initialData?.categoryId || ''),
-        brandId: String(initialData?.brandId || ''),
-        sizeId: String(initialData?.sizeId || ''),
-        colorId: String(initialData?.colorId || ''),
-        discount: parseFloat(String(initialData?.discount?.toFixed(2))),
-        stock: parseFloat(String(initialData?.stock?.toFixed(2))),
-      }
-    : {
-        name: '',
-        description: '',
-        images: [],
-        price: 0,
-        discount: 0,
-        stock: 0,
-        categoryId: '',
-        colorId: '',
-        sizeId: '',
-        brandId: '',
-        isFeatured: false,
-        isArchived: false,
-      }
 
   const form = useForm<z.infer<typeof ProductSchema>>({
     resolver: zodResolver(ProductSchema),
-    defaultValues,
+    defaultValues:
+      asEdit && product
+        ? {
+            name: product.name,
+            description: String(product?.description || 'No Description'),
+            price: parseFloat(String(product?.price)),
+            categoryId: String(product?.categoryId || ''),
+            brandId: String(product?.brandId || ''),
+            sizeId: String(product?.sizeId || ''),
+            colorId: String(product?.colorId || ''),
+            discount: parseFloat(String(product?.discount?.toFixed(2))),
+            stock: parseFloat(String(product?.stock?.toFixed(2))),
+          }
+        : defaultValues,
   })
 
   const onSubmit = async (values: z.infer<typeof ProductSchema>) => {
-    try {
-      setLoading(true)
-      if (initialData) {
-        await axios.patch(`/api/products/${productId}`, values)
-      } else {
-        await axios.post(`/api/products`, values)
-      }
-      router.refresh()
-      router.push(`/dashboard/products`)
-      toast.success(toastMessage)
-    } catch (error: any) {
-      toast.error('Something went wrong.')
-    } finally {
-      setLoading(false)
+    const addProductValues = {
+      name: values.name,
+      description: values.description,
+      price: values.price,
+      stock: values.stock,
+      images: values.images,
+      discount: values.discount,
+      categoryId: values.categoryId,
+      colorId: values.colorId,
+      sizeId: values.sizeId,
+      brandId: values.brandId,
+      isFeatured: values.isFeatured,
+      isArchived: values.isArchived,
+      slug: values.slug,
     }
+
+    if (asEdit && product) {
+      const updateProductValues = {
+        ...addProductValues,
+        id: product.id,
+      }
+
+      await updateProduct(updateProductValues)
+    } else {
+      await addProduct(addProductValues)
+    }
+
+    // try to catch error from response action
+
+    toast({
+      title: asEdit ? 'Product modified' : 'Product added',
+      description: asEdit
+        ? 'Product successfully modified'
+        : 'Product successfully added',
+    })
   }
 
   const onDelete = async () => {
@@ -126,9 +160,9 @@ export const ProductForm: React.FC<ProductFormProps> = ({
       await axios.delete(`/api/products/${params.productId}`)
       router.refresh()
       router.push(`/dashboard/products`)
-      toast.success('Product deleted.')
+      // toast.success("Product deleted.");
     } catch (error: any) {
-      toast.error('Something went wrong.')
+      //toast.error("Something went wrong.");
     } finally {
       setLoading(false)
       setOpen(false)
@@ -145,8 +179,8 @@ export const ProductForm: React.FC<ProductFormProps> = ({
           loading={loading}
         />
         <div className="flex items-center justify-between">
-          <Heading title={title} subtitle={description} />
-          {initialData && (
+          <Heading title={'title'} subtitle={'description'} />
+          {/* {initialData && (
             <Button
               disabled={loading}
               variant="destructive"
@@ -155,7 +189,7 @@ export const ProductForm: React.FC<ProductFormProps> = ({
             >
               <LuTrash className="h-4 w-4" />
             </Button>
-          )}
+          )} */}
         </div>
         <Separator />
         <Form {...form}>
@@ -198,6 +232,10 @@ export const ProductForm: React.FC<ProductFormProps> = ({
                 </FormItem>
               )}
             />
+
+            <SubmitButton pending={isPending}>
+              {asEdit ? 'Modify the product' : 'Add the product'}
+            </SubmitButton>
 
             <div className="md:grid md:grid-cols-3 gap-8">
               <InputForm
@@ -242,7 +280,7 @@ export const ProductForm: React.FC<ProductFormProps> = ({
                   <FormItem>
                     <FormControl>
                       <Textarea
-                        disabled={loading}
+                        // disabled={isSubmitting}
                         placeholder="e.g. 'This course is about...'"
                         {...field}
                       />
@@ -356,7 +394,7 @@ export const ProductForm: React.FC<ProductFormProps> = ({
                 name="brandId"
                 render={({ field }) => (
                   <FormItem>
-                    <FormLabel>Brand</FormLabel>
+                    <FormLabel>Color</FormLabel>
                     <Select
                       disabled={loading}
                       onValueChange={field.onChange}
@@ -428,9 +466,12 @@ export const ProductForm: React.FC<ProductFormProps> = ({
                 )}
               />
             </div>
-            <Button disabled={loading} className="ml-auto" type="submit">
+            {/* <Button disabled={isPending} className="ml-auto" type="submit">
               {action}
-            </Button>
+            </Button> */}
+            <SubmitButton pending={isPending}>
+              {asEdit ? 'Modify the product' : 'Add the product'}
+            </SubmitButton>
           </form>
         </Form>
       </div>

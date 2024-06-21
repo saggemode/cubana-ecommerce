@@ -284,6 +284,18 @@ model OrderItem {
   @@index([productId])
 }
 
+model CheckoutSession {
+    id         Int           @id @default(autoincrement())
+    sessionId  String        @unique
+    sessionUrl String
+    userId     String
+    productIds Int[]
+    quantities Int[]
+    status     SessionStatus @default(ACTIVE)
+    createdAt  DateTime      @default(now())
+    updatedAt  DateTime      @updatedAt
+}
+
 model CustomerInformation {
   id           String   @id @default(cuid())
   name         String
@@ -308,6 +320,7 @@ enum OrderStatusEnum {
   RefundProcessing
   RefundCompleted
   Denied
+  pending
 }
 
 enum PaymentStatusEnum {
@@ -316,3 +329,5 @@ enum PaymentStatusEnum {
   Failed
   Denied
 }
+
+

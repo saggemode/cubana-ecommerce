@@ -156,7 +156,7 @@ export const ProductForm: React.FC<ProductFormProps> = ({
         isArchived: values.isArchived,
       }
 
-      if (initialData) {
+      if (initialData && productId) {
         const updateProductValues = {
           ...addProductValues,
           id: productId,

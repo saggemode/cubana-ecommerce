@@ -154,8 +154,9 @@ export const deleteProductActionSchema = z.object({
 
 export const updateProductStatusActionSchema = z.object({
   id: z.string(),
-  status: z.enum(["ACTIVE", "DRAFT"]),
-});
+  isFeatured: z.boolean().default(false).optional(),
+  //status: z.enum(["ACTIVE", "DRAFT"]),
+})
 
 const OptionValueSchema = z.object({
   id: z.number(),

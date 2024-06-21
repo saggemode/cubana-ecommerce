@@ -2,7 +2,13 @@ import prisma from '@/lib/prisma'
 import type { z } from 'zod'
 import slugify from 'slugify'
 import { NextResponse } from 'next/server'
-import { productActionSchema, updateProductActionSchema } from '@/schemas'
+import {
+  productActionSchema,
+  updateProductActionSchema,
+  deleteProductActionSchema,
+  updateProductStatusActionSchema,
+} from '@/schemas'
+import type { Product } from '@prisma/client'
 
 interface IParams {
   productId?: string
@@ -13,6 +19,7 @@ type ResolvedType<T> = T extends Promise<infer R> ? R : never
 class ProductService {
   static async findProducts() {
     const products = await prisma.product.findMany()
+
     return products
   }
 
@@ -38,24 +45,27 @@ class ProductService {
     }
   }
 
-  //   static async updatedProducts() {
-  //     const products = await prisma.product.findMany();
-  //     const checkoutSessions = await prisma.checkoutSession.findMany();
+  static async updatedProducts() {
+    const products = await prisma.product.findMany()
+    const checkoutSessions = await prisma.checkoutSession.findMany()
 
-  //     const updatedProducts: Product[] = products.map((product) => {
-  //       const sessionsForProduct = checkoutSessions.filter((session) =>
-  //         session.productIds.includes(product.id),
-  //       );
-  //       const totalQuantityOrdered = sessionsForProduct.reduce(
-  //         (total, session) =>
-  //           total + session.quantities[session.productIds.indexOf(product.id)]!,
-  //         0,
-  //       );
-  //       return { ...product, stock: product.stock - totalQuantityOrdered };
-  //     });
+    const updatedProducts: Product[] = products.map((product) => {
+      const sessionsForProduct = checkoutSessions.filter((session: any) =>
+        session.productIds.includes(product.id)
+      )
+      const totalQuantityOrdered = sessionsForProduct.reduce(
+        (total: any, session: any) =>
+          total + session.quantities[session.productIds.indexOf(product.id)]!,
+        0
+      )
 
-  //     return { products, updatedProducts };
-  //   }
+      const stock = product.stock ?? 0 // Provide a default value if product.stock is null
+
+      return { ...product, stock: stock - totalQuantityOrdered }
+    })
+
+    return { products, updatedProducts }
+  }
 
   static async createProduct(values: z.infer<typeof productActionSchema>) {
     try {
@@ -168,28 +178,28 @@ class ProductService {
     }
   }
 
-  //   static async updateProductStatus(
-  //     data: z.infer<typeof updateProductStatusActionSchema>,
-  //   ) {
-  //     if (!data) return;
+  static async updateProductStatus(
+    data: z.infer<typeof updateProductStatusActionSchema>
+  ) {
+    if (!data) return
 
-  //     const { id, status } = data;
+    const { id, isFeatured } = data
 
-  //     await db.product.update({
-  //       where: { id },
-  //       data: {
-  //         status,
-  //       },
-  //     });
-  //   }
+    await prisma.product.update({
+      where: { id },
+      data: {
+        isFeatured,
+      },
+    })
+  }
 
-  //   static async deleteProduct(data: z.infer<typeof deleteProductActionSchema>) {
-  //     if (!data) return;
+  static async deleteProduct(data: z.infer<typeof deleteProductActionSchema>) {
+    if (!data) return
 
-  //     const { id } = data;
+    const { id } = data
 
-  //     await db.product.delete({ where: { id } });
-  //   }
+    await prisma.product.delete({ where: { id } })
+  }
 }
 
 export type ProductWithVariants = ResolvedType<

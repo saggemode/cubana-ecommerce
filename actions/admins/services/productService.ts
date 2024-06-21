@@ -1,24 +1,23 @@
-import prisma from "@/lib/prisma";
-import type { z } from "zod";
-import slugify from "slugify";
-import { NextResponse } from "next/server";
-//import type { Product } from "@prisma/client";
-import { productActionSchema, updateProductActionSchema } from "@/schemas";
+import prisma from '@/lib/prisma'
+import type { z } from 'zod'
+import slugify from 'slugify'
+import { NextResponse } from 'next/server'
+import { productActionSchema, updateProductActionSchema } from '@/schemas'
 
 interface IParams {
-  productId?: string;
+  productId?: string
 }
 
-type ResolvedType<T> = T extends Promise<infer R> ? R : never;
+type ResolvedType<T> = T extends Promise<infer R> ? R : never
 
 class ProductService {
   static async findProducts() {
-    const products = await prisma.product.findMany();
-    return products;
+    const products = await prisma.product.findMany()
+    return products
   }
 
   static async findProduct(params: IParams) {
-    const { productId } = params;
+    const { productId } = params
     const product = await prisma.product.findUnique({
       where: {
         id: productId,
@@ -30,13 +29,13 @@ class ProductService {
         color: true,
         images: true,
       },
-    });
+    })
 
     // return product;
     return {
       ...product,
       createdAt: product?.createdAt.toString(),
-    };
+    }
   }
 
   //   static async updatedProducts() {
@@ -60,9 +59,9 @@ class ProductService {
 
   static async createProduct(values: z.infer<typeof productActionSchema>) {
     try {
-      const validatedFields = productActionSchema.safeParse(values);
+      const validatedFields = productActionSchema.safeParse(values)
       if (!validatedFields.success) {
-        return { error: "Invalid fields!" };
+        return { error: 'Invalid fields!' }
       }
 
       const {
@@ -70,19 +69,23 @@ class ProductService {
         description,
         price,
         stock,
+        brandId,
+        discount,
+        images,
         categoryId,
         colorId,
         sizeId,
-        images,
         isFeatured,
         isArchived,
-      } = validatedFields.data;
+      } = validatedFields.data
 
       await prisma.product.create({
         data: {
           name,
           description,
           price,
+          brandId,
+          discount,
           isFeatured,
           isArchived,
           categoryId,
@@ -97,32 +100,34 @@ class ProductService {
             },
           },
         },
-      });
-      return { success: "Product Created" };
+      })
+      return { success: 'Product Created' }
       // return NextResponse.json(product);
     } catch (error) {
-      console.log("[product]", error);
-      return new NextResponse("Internal Error", { status: 500 });
+      console.log('[product]', error)
+      return new NextResponse('Internal Error', { status: 500 })
     }
   }
 
   static async updateProduct(data: z.infer<typeof updateProductActionSchema>) {
     try {
-      if (!data) return;
+      if (!data) return
 
       const {
         id,
         name,
         description,
         price,
+        stock,
+        brandId,
+        discount,
         images,
-        isFeatured,
-        isArchived,
         categoryId,
         colorId,
         sizeId,
-        stock,
-      } = data;
+        isFeatured,
+        isArchived,
+      } = data
 
       await prisma.product.update({
         where: { id },
@@ -131,7 +136,7 @@ class ProductService {
             deleteMany: {},
           },
         },
-      });
+      })
 
       const product = await prisma.product.update({
         where: {
@@ -144,6 +149,8 @@ class ProductService {
           isFeatured,
           isArchived,
           categoryId,
+          brandId,
+          discount,
           colorId,
           sizeId,
           stock,
@@ -153,11 +160,11 @@ class ProductService {
             },
           },
         },
-      });
-      return NextResponse.json(product);
+      })
+      return NextResponse.json(product)
     } catch (error) {
-      console.log("[Prouct_ID]", error);
-      return new NextResponse("Internal Error", { status: 500 });
+      console.log('[Prouct_ID]', error)
+      return new NextResponse('Internal Error', { status: 500 })
     }
   }
 
@@ -187,6 +194,6 @@ class ProductService {
 
 export type ProductWithVariants = ResolvedType<
   ReturnType<typeof ProductService.findProduct>
->;
+>
 
-export default ProductService;
+export default ProductService

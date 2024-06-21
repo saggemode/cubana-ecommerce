@@ -2,14 +2,17 @@
 
 import * as z from 'zod'
 import axios from 'axios'
-import { useState } from 'react'
+import { useTransition, useState } from 'react'
 import { zodResolver } from '@hookform/resolvers/zod'
 import { useForm } from 'react-hook-form'
 import { toast } from 'react-hot-toast'
 import { LuTrash } from 'react-icons/lu'
+import { FormError } from '@/components/form-error'
+import { FormSuccess } from '@/components/form-success'
 import { Category, Color, Image, Product, Size, Brand } from '@prisma/client'
 import { useParams, useRouter } from 'next/navigation'
 import { ScrollArea } from '@/components/ui/scroll-area'
+import { useToast } from '@/components/ui/use-toast'
 
 import { Button } from '@/components/ui/button'
 import {
@@ -36,6 +39,10 @@ import { Checkbox } from '@/components/ui/checkbox'
 import Heading from '@/components/Heading'
 import { ProductSchema } from '@/schemas'
 import { InputForm } from '@/components/ui/input-form'
+// import ProductService, {
+//   ProductWithVariants,
+// } from '@/actions/admins/services/productService'
+import { addProduct, updateProduct } from '@/actions/admins/actions/products'
 
 interface ProductFormProps {
   initialData?:
@@ -59,6 +66,11 @@ export const ProductForm: React.FC<ProductFormProps> = ({
 
   productId,
 }) => {
+  const { toast } = useToast()
+  const [error, setError] = useState<string | undefined>('')
+  const [success, setSuccess] = useState<string | undefined>('')
+  const [isPending, startTransition] = useTransition()
+
   const params = useParams()
   const router = useRouter()
 
@@ -67,7 +79,7 @@ export const ProductForm: React.FC<ProductFormProps> = ({
 
   const title = initialData ? 'Edit product' : 'Create product'
   const description = initialData ? 'Edit a product.' : 'Add a new product'
-  const toastMessage = initialData ? 'Product updated.' : 'Product created.'
+  // const toastMessage = initialData ? 'Product updated.' : 'Product created.'
   const action = initialData ? 'Save changes' : 'Create'
 
   const defaultValues = initialData
@@ -102,22 +114,67 @@ export const ProductForm: React.FC<ProductFormProps> = ({
     defaultValues,
   })
 
+  // const onSubmit = async (values: z.infer<typeof ProductSchema>) => {
+  //   try {
+  //     setLoading(true)
+  //     if (initialData) {
+  //       await axios.patch(`/api/products/${productId}`, values)
+  //     } else {
+  //       await axios.post(`/api/products`, values)
+  //     }
+  //     router.refresh()
+  //     router.push(`/dashboard/products`)
+  //     toast.success(toastMessage)
+  //   } catch (error: any) {
+  //     toast.error('Something went wrong.')
+  //   } finally {
+  //     setLoading(false)
+  //   }
+  // }
+
+  const values = form.getValues()
+
   const onSubmit = async (values: z.infer<typeof ProductSchema>) => {
-    try {
-      setLoading(true)
-      if (initialData) {
-        await axios.patch(`/api/products/${productId}`, values)
-      } else {
-        await axios.post(`/api/products`, values)
+    setError('')
+    setSuccess('')
+
+    // console.log('clicked')
+
+    startTransition(async () => {
+      const addProductValues = {
+        name: values.name,
+        description: values.description,
+        price: values.price,
+        stock: values.stock,
+        discount: values.discount,
+        images: values.images,
+        categoryId: values.categoryId,
+        colorId: values.colorId,
+        sizeId: values.sizeId,
+        brandId: values.brandId,
+        isFeatured: values.isFeatured,
+        isArchived: values.isArchived,
       }
-      router.refresh()
-      router.push(`/dashboard/products`)
-      toast.success(toastMessage)
-    } catch (error: any) {
-      toast.error('Something went wrong.')
-    } finally {
-      setLoading(false)
-    }
+
+      if (initialData) {
+        const updateProductValues = {
+          ...addProductValues,
+          id: productId,
+        }
+
+        await updateProduct(updateProductValues)
+      } else {
+        await addProduct(addProductValues)
+        //await ProductService.createProduct(addProductValues);
+      }
+
+      toast({
+        title: initialData ? 'Product modified' : 'Product added',
+        description: initialData
+          ? 'Product successfully modified'
+          : 'Product successfully added',
+      })
+    })
   }
 
   const onDelete = async () => {
@@ -126,9 +183,9 @@ export const ProductForm: React.FC<ProductFormProps> = ({
       await axios.delete(`/api/products/${params.productId}`)
       router.refresh()
       router.push(`/dashboard/products`)
-      toast.success('Product deleted.')
+      //toast.success('Product deleted.')
     } catch (error: any) {
-      toast.error('Something went wrong.')
+      //toast.error('Something went wrong.')
     } finally {
       setLoading(false)
       setOpen(false)
@@ -142,13 +199,13 @@ export const ProductForm: React.FC<ProductFormProps> = ({
           isOpen={open}
           onClose={() => setOpen(false)}
           onConfirm={onDelete}
-          loading={loading}
+          loading={isPending}
         />
         <div className="flex items-center justify-between">
           <Heading title={title} subtitle={description} />
           {initialData && (
             <Button
-              disabled={loading}
+              disabled={isPending}
               variant="destructive"
               size="sm"
               onClick={() => setOpen(true)}
@@ -176,7 +233,7 @@ export const ProductForm: React.FC<ProductFormProps> = ({
                           ? field.value.map((image) => image.url)
                           : []
                       }
-                      //disabled={isPending}
+                      disabled={isPending}
                       onChange={(url) =>
                         field.onChange([
                           ...(Array.isArray(field.value) ? field.value : []),
@@ -205,7 +262,7 @@ export const ProductForm: React.FC<ProductFormProps> = ({
                 name="name"
                 label="Name"
                 placeholder="Product Name"
-                disabled={loading}
+                disabled={isPending}
               />
 
               <InputForm
@@ -214,7 +271,7 @@ export const ProductForm: React.FC<ProductFormProps> = ({
                 label="Price"
                 placeholder="9.99"
                 type="number"
-                disabled={loading}
+                disabled={isPending}
               />
 
               <InputForm
@@ -223,7 +280,7 @@ export const ProductForm: React.FC<ProductFormProps> = ({
                 label="Discount"
                 placeholder="9.99"
                 type="number"
-                disabled={loading}
+                disabled={isPending}
               />
 
               <InputForm
@@ -232,7 +289,7 @@ export const ProductForm: React.FC<ProductFormProps> = ({
                 label="Stock"
                 placeholder="10"
                 type="number"
-                disabled={loading}
+                disabled={isPending}
               />
 
               <FormField
@@ -242,7 +299,7 @@ export const ProductForm: React.FC<ProductFormProps> = ({
                   <FormItem>
                     <FormControl>
                       <Textarea
-                        disabled={loading}
+                        disabled={isPending}
                         placeholder="e.g. 'This course is about...'"
                         {...field}
                       />
@@ -259,7 +316,7 @@ export const ProductForm: React.FC<ProductFormProps> = ({
                   <FormItem>
                     <FormLabel>Category</FormLabel>
                     <Select
-                      disabled={loading}
+                      disabled={isPending}
                       onValueChange={field.onChange}
                       value={field.value}
                       defaultValue={field.value}
@@ -292,7 +349,7 @@ export const ProductForm: React.FC<ProductFormProps> = ({
                   <FormItem>
                     <FormLabel>Size</FormLabel>
                     <Select
-                      disabled={loading}
+                      disabled={isPending}
                       onValueChange={field.onChange}
                       value={field.value}
                       defaultValue={field.value}
@@ -325,7 +382,7 @@ export const ProductForm: React.FC<ProductFormProps> = ({
                   <FormItem>
                     <FormLabel>Color</FormLabel>
                     <Select
-                      disabled={loading}
+                      disabled={isPending}
                       onValueChange={field.onChange}
                       value={field.value}
                       defaultValue={field.value}
@@ -358,7 +415,7 @@ export const ProductForm: React.FC<ProductFormProps> = ({
                   <FormItem>
                     <FormLabel>Brand</FormLabel>
                     <Select
-                      disabled={loading}
+                      disabled={isPending}
                       onValueChange={field.onChange}
                       value={field.value}
                       defaultValue={field.value}
@@ -391,6 +448,7 @@ export const ProductForm: React.FC<ProductFormProps> = ({
                   <FormItem className="flex flex-row items-start space-x-3 space-y-0 rounded-md border p-4">
                     <FormControl>
                       <Checkbox
+                        disabled={isPending}
                         checked={field.value}
                         // @ts-ignore
                         onCheckedChange={field.onChange}
@@ -413,6 +471,7 @@ export const ProductForm: React.FC<ProductFormProps> = ({
                   <FormItem className="flex flex-row items-start space-x-3 space-y-0 rounded-md border p-4">
                     <FormControl>
                       <Checkbox
+                        disabled={isPending}
                         checked={field.value}
                         // @ts-ignore
                         onCheckedChange={field.onChange}
@@ -428,7 +487,9 @@ export const ProductForm: React.FC<ProductFormProps> = ({
                 )}
               />
             </div>
-            <Button disabled={loading} className="ml-auto" type="submit">
+            <FormError message={error} />
+            <FormSuccess message={success} />
+            <Button disabled={isPending} className="ml-auto" type="submit">
               {action}
             </Button>
           </form>

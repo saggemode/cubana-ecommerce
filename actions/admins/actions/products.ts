@@ -17,16 +17,19 @@ import { productActionSchema } from '@/schemas'
 //   redirect(PRODUCT_URL)
 // }
 
-export const addProduct = adminAction(productActionSchema, async (data: any) => {
-  try {
-    await ProductService.createProduct(data)
-  } catch (error) {
-    if (error instanceof Error) return { error: error.message }
-  }
+export const addProduct = adminAction(
+  productActionSchema,
+  async (data: any) => {
+    try {
+      await ProductService.createProduct(data)
+    } catch (error) {
+      if (error instanceof Error) return { error: error.message }
+    }
 
-  revalidatePath(PRODUCT_URL)
-  redirect(PRODUCT_URL)
-})
+    revalidatePath(PRODUCT_URL)
+    redirect(PRODUCT_URL)
+  }
+)
 
 export const updateProduct = async (data: any) => {
   try {

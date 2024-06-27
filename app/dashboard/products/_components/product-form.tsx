@@ -42,7 +42,7 @@ import { InputForm } from '@/components/ui/input-form'
 // import ProductService, {
 //   ProductWithVariants,
 // } from '@/actions/admins/services/productService'
-import { addProduct, updateProduct } from '@/actions/admins/actions/products'
+import { addProduct, updateProduct } from '@/actions/admins/products'
 
 interface ProductFormProps {
   initialData?:

@@ -13,7 +13,7 @@ const Cart = () => {
   // const { user } = useUser()
   const cart = useCart()
   // const items = useCart.useCartItems
-    const { removeItem, increaseQuantity, decreaseQuantity } = useCart()
+  const { removeItem, increaseQuantity, decreaseQuantity } = useCart()
 
   const total = cart.cartItems.reduce(
     (acc, cartItem) => acc + (cartItem.item.price ?? 0) * cartItem.quantity,
@@ -22,7 +22,7 @@ const Cart = () => {
   const totalRounded = parseFloat(total.toFixed(2))
 
   const handleCheckout = async () => {
-    console.log('hello checkout')
+    router.push('/shipping-address')
     // try {
     //   if (!user) {
     //     router.push('sign-in')

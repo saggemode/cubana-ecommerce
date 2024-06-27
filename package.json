@@ -71,6 +71,7 @@
     "@vercel/postgres": "^0.8.0",
     "auto-zustand-selectors-hook": "^2.0.3",
     "axios": "^1.6.8",
+    "bcrypt-ts-edge": "^3.0.1",
     "bcryptjs": "^2.4.3",
     "browser-image-compression": "^2.0.2",
     "check-password-strength": "^2.0.10",

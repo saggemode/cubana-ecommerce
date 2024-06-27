@@ -18,30 +18,98 @@ type ResolvedType<T> = T extends Promise<infer R> ? R : never
 
 class ProductService {
   static async findProducts() {
-    const products = await prisma.product.findMany()
+    try {
+      const products = await prisma.product.findMany({
+        include: {
+          brand: true,
+          category: true,
+          color: true,
+          size: true,
+          images: true,
+        },
+        orderBy: {
+          createdAt: 'desc',
+        },
+      })
 
-    return products
+      const safeProducts = products.map((products) => ({
+        ...products,
+        createdAt: products.createdAt.toISOString(),
+      }))
+
+      return safeProducts
+    } catch (error: any) {
+      throw new Error(error)
+    }
   }
 
   static async findProduct(params: IParams) {
-    const { productId } = params
-    const product = await prisma.product.findUnique({
-      where: {
-        id: productId,
-      },
-      include: {
-        category: true,
-        size: true,
-        brand: true,
-        color: true,
-        images: true,
-      },
-    })
+    try {
+      const { productId } = params
 
-    // return product;
-    return {
-      ...product,
-      createdAt: product?.createdAt.toString(),
+      const product = await prisma.product.findUnique({
+        where: {
+          id: productId,
+        },
+
+        include: {
+          category: true,
+          size: true,
+          brand: true,
+          color: true,
+          images: true,
+        },
+      })
+
+      if (!product) {
+        return null
+      }
+
+      return {
+        ...product,
+        createdAt: product?.createdAt.toString(),
+      }
+    } catch (error: any) {
+      throw new Error(error)
+    }
+  }
+
+  static async relatedProducts(productId: string) {
+    try {
+      // Fetch the product details based on the product ID
+      const product = await prisma.product.findUnique({
+        where: {
+          id: productId,
+        },
+        include: {
+          category: true,
+          images: true,
+        },
+      })
+
+      if (!product) {
+        throw new Error('Product not found')
+      }
+
+      // Fetch related products based on the category of the given product
+      const relatedProducts = await prisma.product.findMany({
+        where: {
+          categoryId: product.categoryId,
+          // Exclude the current product from the related products
+          NOT: {
+            id: productId,
+          },
+        },
+
+        include: {
+          images: true,
+        },
+      })
+
+      return relatedProducts
+    } catch (error) {
+      console.error('Error retrieving related products:', error)
+      throw error
     }
   }
 

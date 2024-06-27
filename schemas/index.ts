@@ -1,6 +1,6 @@
-import * as z from "zod";
-import { UserRole } from "@prisma/client";
-import { PAYMENT_METHODS } from "@/constants/constant";
+import * as z from 'zod'
+import { UserRole } from '@prisma/client'
+import { PAYMENT_METHODS } from '@/constants/constant'
 
 export const SettingsSchema = z
   .object({
@@ -15,114 +15,113 @@ export const SettingsSchema = z
   .refine(
     (data) => {
       if (data.password && !data.newPassword) {
-        return false;
+        return false
       }
 
-      return true;
+      return true
     },
     {
-      message: "New password is required!",
-      path: ["newPassword"],
+      message: 'New password is required!',
+      path: ['newPassword'],
     }
   )
   .refine(
     (data) => {
       if (data.newPassword && !data.password) {
-        return false;
+        return false
       }
 
-      return true;
+      return true
     },
     {
-      message: "Password is required!",
-      path: ["password"],
+      message: 'Password is required!',
+      path: ['password'],
     }
-  );
+  )
 
 export const NewPasswordSchema = z.object({
   password: z.string().min(6, {
-    message: "Minimum of 6 characters required",
+    message: 'Minimum of 6 characters required',
   }),
-});
+})
 
 export const ResetSchema = z.object({
   email: z.string().email({
-    message: "Email is required",
+    message: 'Email is required',
   }),
-});
+})
 
 export const LoginSchema = z.object({
   email: z.string().email({
-    message: "Email is required",
+    message: 'Email is required',
   }),
   password: z.string().min(1, {
-    message: "Password is required",
+    message: 'Password is required',
   }),
   code: z.optional(z.string()),
-});
+})
 
 export const RegisterSchema = z.object({
   email: z.string().email({
-    message: "Email is required",
+    message: 'Email is required',
   }),
   password: z.string().min(6, {
-    message: "Minimum 6 characters required",
+    message: 'Minimum 6 characters required',
   }),
   name: z.string().min(1, {
-    message: "Name is required",
+    message: 'Name is required',
   }),
-});
+})
 
 export const BannerSchema = z.object({
   label: z.string().min(4, {
-    message: "Minimum 6 characters required",
+    message: 'Minimum 6 characters required',
   }),
   imageUrl: z.string().min(1),
-});
+})
 
 export const CategorySchema = z.object({
   title: z.string().min(1, {
-    message: "Minimum 1 characters required",
+    message: 'Minimum 1 characters required',
   }),
   // description: z.string().min(4, {
   //   message: "Minimum 6 characters required",
   // }),
-});
+})
 
 export const BrandSchema = z.object({
   name: z.string().min(1, {
-    message: "Minimum 1 characters required",
+    message: 'Minimum 1 characters required',
   }),
-});
+})
 
 export const SizeSchema = z.object({
   name: z.string().min(1, {
-    message: "Minimum 1 characters required",
+    message: 'Minimum 1 characters required',
   }),
 
   value: z.string().min(1, {
-    message: "Minimum 1 characters required",
+    message: 'Minimum 1 characters required',
   }),
-});
+})
 
 export const ColorSchema = z.object({
   name: z.string().min(2, {
-    message: "Minimum 1 characters required",
+    message: 'Minimum 1 characters required',
   }),
 
   value: z.string().min(4).max(9).regex(/^#/, {
-    message: "String must be a valid hex code",
+    message: 'String must be a valid hex code',
   }),
-});
+})
 
-
-const MAX_FILE_SIZE = 10000000;
+const MAX_FILE_SIZE = 10000000
 const ACCEPTED_IMAGE_TYPES = [
-  "image/jpeg",
-  "image/jpg",
-  "image/png",
-  "image/webp",
-];
+  'image/jpeg',
+  'image/jpg',
+  'image/png',
+  'image/webp',
+]
 export const ProductSchema = z.object({
   name: z.string().min(1),
   slug: z.string().optional(),
@@ -141,16 +140,16 @@ export const ProductSchema = z.object({
 
 export const productActionSchema = z.object({
   ...ProductSchema.shape, // Spread all fields from ProductSchema
-});
+})
 
 export const updateProductActionSchema = z.object({
   ...ProductSchema.shape,
   id: z.string(),
-});
+})
 
 export const deleteProductActionSchema = z.object({
   id: z.string(),
-});
+})
 
 export const updateProductStatusActionSchema = z.object({
   id: z.string(),
@@ -164,20 +163,20 @@ const OptionValueSchema = z.object({
   price: z.number(),
   stock: z.number(),
   variantId: z.number(),
-});
+})
 
 const VariantSchema = z.object({
   id: z.number(),
   name: z.string(),
   productId: z.number(),
   optionValues: z.array(OptionValueSchema), // Add this line
-});
+})
 
 export const shippingAddressSchema = z.object({
   fullName: z.string().min(3, 'Name must be at least 3 characters'),
   streetAddress: z.string().min(3, 'Address must be at least 3 characters'),
   city: z.string().min(3, 'city must be at least 3 characters'),
-  postalCode: z.string().min(3, 'Postal code must be at least 3 characters'),
+  postalCode: z.string().optional(),
   country: z.string().min(3, 'Country must be at least 3 characters'),
   lat: z.number().optional(),
   lng: z.number().optional(),

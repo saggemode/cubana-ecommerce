@@ -1,14 +1,14 @@
-
-import { Product } from '@/types';
-import { useEffect, useState } from 'react';
-import { create } from 'zustand';
-import { persist } from 'zustand/middleware';
+'use client'
+import { Product } from '@/types'
+import { useEffect, useState } from 'react'
+import { create } from 'zustand'
+import { persist } from 'zustand/middleware'
 
 type Wishlist = {
-  wishlist: Product[];
-  removeFromWishList: (id: string) => void;
-  toggleWishlist: (newItem: Product) => void;
-};
+  wishlist: Product[]
+  removeFromWishList: (id: string) => void
+  toggleWishlist: (newItem: Product) => void
+}
 
 export const useWishlistStore = create<Wishlist>()(
   persist(
@@ -19,41 +19,41 @@ export const useWishlistStore = create<Wishlist>()(
         set((state) => {
           return {
             wishlist: state.wishlist.filter((item) => item.id !== id),
-          };
+          }
         }),
 
       toggleWishlist: (newItem) =>
         set((state) => {
           const itemExists = state.wishlist.find(
             (item) => item.id === newItem.id
-          );
+          )
 
           if (itemExists) {
             return {
               wishlist: state.wishlist.filter((item) => item.id !== newItem.id),
-            };
+            }
           }
 
-          return { wishlist: [...state.wishlist, newItem] };
+          return { wishlist: [...state.wishlist, newItem] }
         }),
     }),
     { name: 'cart-storage' }
   )
-);
+)
 
 /*
 Workaround to integrate zustand persist with NextJS SSR
 https://github.com/pmndrs/zustand/issues/1145
 */
 export const useWishlist = () => {
-  const initialWishlist = useWishlistStore((state) => state.wishlist);
-  const [wishlist, setWishlist] = useState<Product[]>([]);
-  const [isHydrated, setIsHydrated] = useState(false);
+  const initialWishlist = useWishlistStore((state) => state.wishlist)
+  const [wishlist, setWishlist] = useState<Product[]>([])
+  const [isHydrated, setIsHydrated] = useState(false)
 
   useEffect(() => {
-    setWishlist(initialWishlist);
-    setIsHydrated(true);
-  }, [initialWishlist]);
+    setWishlist(initialWishlist)
+    setIsHydrated(true)
+  }, [initialWishlist])
 
-  return { wishlist, isHydrated };
-};
+  return { wishlist, isHydrated }
+}

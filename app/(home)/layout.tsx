@@ -2,8 +2,15 @@ import ClientOnly from '@/components/ClientOnly'
 import { Navbar } from './_components/navbar'
 import Footer from './_components/Footer'
 
+import { Metadata } from 'next'
+import { APP_NAME } from '@/constants/constant'
+
 interface ProtectedLayoutProps {
   children: React.ReactNode
+}
+
+export const metadata: Metadata = {
+  title: `ADIL- ${APP_NAME}`,
 }
 
 const ProtectedLayout = ({ children }: ProtectedLayoutProps) => {

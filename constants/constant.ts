@@ -1,19 +1,19 @@
 export const APP_NAME = process.env.NEXT_PUBLIC_APP_NAME || 'Adil'
+
 export const APP_DESCRIPTION =
-  process.env.NEXT_PUBLIC_APP_DESCRIPTION ||
-  'Adil ecommerce'
+  process.env.NEXT_PUBLIC_APP_DESCRIPTION || 'Adil ecommerce'
 
 export const PAGE_SIZE = Number(process.env.PAGE_SIZE) || 3
 
 export const PAYMENT_METHODS = process.env.PAYMENT_METHODS
   ? process.env.PAYMENT_METHODS.split(', ')
-  : ['PayPal', 'Stripe', 'CashOnDelivery']
+  : ['PayPal', 'Stripe', 'CashOnDelivery', 'Opay']
 export const DEFAULT_PAYMENT_METHOD =
   process.env.DEFAULT_PAYMENT_METHOD || 'PayPal'
 
 export const USER_ROLES = process.env.USER_ROLES
   ? process.env.USER_ROLES.split(', ')
-  : ['admin', 'user']
+  : ['admin', 'user', 'moderator']
 
 export const signInDefaultValues = {
   email: '',

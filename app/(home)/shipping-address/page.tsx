@@ -8,17 +8,9 @@ import { getUserById } from '@/actions/services/userService'
 import { ShippingAddress } from '@/types'
 
 const ShippingPage = async () => {
-  // const cart = useCart()
-  // if (!cart || cart.cartItems.length === 0) redirect('/cart')
-  // const session = useCurrentUser()
   const session = await auth()
   const user = await getUserById(session?.user.id)
-  // console.log(user)
 
-  // Type assertion
-  //const fetchedAddress = user?.address as ShippingAddress | null
-
-  // Optional validation step
   const isShippingAddress = (address: any): address is ShippingAddress => {
     return (
       typeof address.fullName === 'string' &&

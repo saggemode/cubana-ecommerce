@@ -197,3 +197,31 @@ export const paymentResultSchema = z.object({
   email_address: z.string(),
   pricePaid: z.string(),
 })
+
+export const insertReviewSchema = z.object({
+  rating: z.coerce
+    .number()
+    .int()
+    .min(1, 'Rating must be at least 1')
+    .max(5, 'Rating must be at most 5'),
+  title: z.string(),
+  description: z.string(),
+  productId: z.string(),
+  userId: z.string(),
+})
+
+// export const insertOrderSchema = createInsertSchema(orders, {
+//   shippingAddress: shippingAddressSchema,
+//   paymentResult: z
+//     .object({
+//       id: z.string(),
+//       status: z.string(),
+//       email_address: z.string(),
+//       pricePaid: z.string(),
+//     })
+//     .optional(),
+// })
+
+// export const insertOrderItemSchema = createInsertSchema(orderItems, {
+//   price: z.number(),
+// })

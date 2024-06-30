@@ -4,6 +4,7 @@ import type { z } from 'zod'
 import type {
   //CustomerInformation,
   Order,
+  Review,
   Product as OrderTypeProduct,
 } from '@prisma/client'
 
@@ -16,27 +17,20 @@ export interface CustomerInformation {
   state: string
 }
 
-// export interface ShippingAddress {
-//   id: string
-//   fullName: string
-//   streetAddress: string
-//   postalCode: string
-//   city: string
-//   country: string
-// }
-
 export interface ShippingAddress {
   fullName: string
   streetAddress: string
   city: string
-  country: string | null
-  postalCode?: string | null
+  country: string
+  postalCode?: string
   lat?: number
   lng?: number
 }
 
 //  export type ShippingAddress = z.infer<typeof shippingAddressSchema>
-
+export type Review = InferSelectModel<typeof Review> & {
+  user?: { name: string }
+}
 export interface Product {
   id: string
   name: string
@@ -79,7 +73,6 @@ export interface Billboard {
 export interface Category {
   id: string | null
   title: string | null
-  // description: string | null;
 }
 
 export interface Brand {
@@ -192,16 +185,12 @@ export interface OrderProduct extends OrderTypeProduct {
 }
 
 export type CreditCard =
-  | 'amex'
-  | 'diners'
-  | 'discover'
-  | 'eftpos_au'
-  | 'jcb'
   | 'mastercard'
   | 'unionpay'
   | 'visa'
   | 'opay'
   | 'unknown'
+  | 'moniepoint'
 
 export type MainNavItem = NavItemWithOptionalChildren
 

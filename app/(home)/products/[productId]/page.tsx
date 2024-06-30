@@ -7,8 +7,9 @@ import Gallery from './_components/gallery'
 import Link from 'next/link'
 import { GridTileImage } from '@/components/grid/tile'
 import getRelatedProducts from '@/actions/getRelatedProduct'
-import CartButton from './_components/CartButton'
 import ProductCart from './_components/ProductCart'
+import { auth } from '@/auth'
+import ProductReview from './_components/ProductReview'
 
 interface IParams {
   params: {
@@ -18,6 +19,8 @@ interface IParams {
 
 const ProductPage: React.FC<IParams> = async ({ params }) => {
   const product = await getProductById(params)
+  const session = await auth()
+  //console.log(session)
 
   if (!product) {
     return (
@@ -37,6 +40,15 @@ const ProductPage: React.FC<IParams> = async ({ params }) => {
           <ProductCart product={product} />
         </div>
         <RelatedProducts productId={product.id} />
+
+        <section className="mt-10">
+          <h2 className="h2-bold  mb-5">Customer Reviews</h2>
+          <ProductReview
+            productId={product.id}
+            productSlug={product.slug}
+            userId={session?.user.id!}
+          />
+        </section>
       </div>
     </ClientOnly>
   )

@@ -12,6 +12,8 @@ import { currentUser } from '@/lib/auth'
 import { ShippingAddress } from '@/types'
 import { getSession } from 'next-auth/react'
 
+
+
 export async function getUserById(userId: string | undefined) {
   try {
     const user = await prisma.user.findUnique({

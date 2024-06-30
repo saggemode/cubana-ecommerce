@@ -126,9 +126,9 @@ export default function ShippingAddressForm({
                 name="postalCode"
                 render={({ field }: { field: any }) => (
                   <FormItem className="w-full">
-                    <FormLabel>Postal Code</FormLabel>
+                    <FormLabel>Phone number</FormLabel>
                     <FormControl>
-                      <Input placeholder="Enter postal code" {...field} />
+                      <Input placeholder="Enter postal phone number" {...field} />
                     </FormControl>
                     <FormMessage />
                   </FormItem>

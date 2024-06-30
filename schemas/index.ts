@@ -210,18 +210,32 @@ export const insertReviewSchema = z.object({
   userId: z.string(),
 })
 
-// export const insertOrderSchema = createInsertSchema(orders, {
-//   shippingAddress: shippingAddressSchema,
-//   paymentResult: z
-//     .object({
-//       id: z.string(),
-//       status: z.string(),
-//       email_address: z.string(),
-//       pricePaid: z.string(),
-//     })
-//     .optional(),
-// })
+export const insertOrderSchema = z.object({
+  shippingAddress: shippingAddressSchema,
+  paymentResult: z
+    .object({
+      id: z.string(),
+      status: z.string(),
+      email_address: z.string(),
+      pricePaid: z.string(),
+    })
+    .optional(),
+})
 
-// export const insertOrderItemSchema = createInsertSchema(orderItems, {
-//   price: z.number(),
-// })
+export const insertOrderItemSchema = z.object({
+  price: z.number(),
+})
+
+export const cartItemSchema = z.object({
+  productId: z.string().min(1, 'Product is required'),
+  name: z.string().min(1, 'Name is required'),
+  slug: z.string().min(1, 'Slug is required'),
+  quantity: z.number().int().nonnegative('Quantity must be a non-negative number'),
+  image: z.string().min(1, 'Image is required'),
+  price: z
+    .number()
+    .refine(
+      (value) => /^\d+(\.\d{2})?$/.test(formatNumberWithDecimal(value)),
+      'Price must have exactly two decimal places (e.g., 49.99)'
+    ),
+})

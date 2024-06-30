@@ -1,10 +1,12 @@
 import { Icons } from '@/components/icons'
-import { shippingAddressSchema } from '@/schemas'
+import { shippingAddressSchema,  } from '@/schemas'
 import type { z } from 'zod'
 import type {
   //CustomerInformation,
   Order,
   Review,
+  Cart,
+  CartItem,
   Product as OrderTypeProduct,
 } from '@prisma/client'
 
@@ -31,6 +33,10 @@ export interface ShippingAddress {
 export type Review = InferSelectModel<typeof Review> & {
   user?: { name: string }
 }
+
+export type Cart = InferSelectModel<typeof Cart>
+export type CartItem = z.infer<typeof cartItemSchema>
+
 export interface Product {
   id: string
   name: string

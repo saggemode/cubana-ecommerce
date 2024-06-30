@@ -4,6 +4,7 @@ import useCart from '@/hooks/use-cart'
 import Price from '@/components/price'
 // import { useUser } from '@clerk/nextjs'
 import { MinusCircle, PlusCircle, Trash } from 'lucide-react'
+
 import Image from 'next/image'
 import { useRouter } from 'next/navigation'
 import { Button } from '@/components/ui/button'
@@ -21,29 +22,9 @@ const Cart = () => {
   )
   const totalRounded = parseFloat(total.toFixed(2))
 
-  // const handleCheckout = async () => {
-  //   router.push('/shipping-address')
-  //   // try {
-  //   //   if (!user) {
-  //   //     router.push('sign-in')
-  //   //   } else {
-  //   //     const res = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/checkout`, {
-  //   //       method: 'POST',
-  //   //       body: JSON.stringify({ cartItems: cart.cartItems, customer }),
-  //   //     })
-  //   //     const data = await res.json()
-  //   //     window.location.href = data.url
-  //   //     console.log(data)
-  //   //   }
-  //   // } catch (err) {
-  //   //   console.log('[checkout_POST]', err)
-  //   // }
-  // }
-
-   const handleCheckout = async () => {
-     router.push('/payment-method')
-    
-   }
+  const handleCheckout = async () => {
+    router.push('/shipping-address')
+  }
 
   return (
     <div className="flex gap-20 py-16 px-10 max-lg:flex-col max-sm:px-3">

@@ -5,6 +5,7 @@ import ShippingAddressForm from './shipping-address-form'
 import useCart from '@/hooks/use-cart'
 import { auth } from '@/auth'
 import { getUserById } from '@/actions/services/userService'
+
 import { ShippingAddress } from '@/types'
 
 const ShippingPage = async () => {

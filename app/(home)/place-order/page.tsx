@@ -4,17 +4,47 @@ import { Button } from '@/components/ui/button'
 import { Card, CardContent } from '@/components/ui/card'
 import { getUserById } from '@/actions/services/userService'
 import { redirect } from 'next/navigation'
-import PlaceOrderForm from './PlaceOrderForm'
-import Image from 'next/image'
 import Link from 'next/link'
 import PlaceOrderTable from './PlaceOrderTable'
 import PlaceOrder from './PlaceOrder'
+import { ShippingAddress } from '@/types'
 
 export default async function PlaceOrderPage() {
   const session = await auth()
   const user = await getUserById(session?.user.id!)
-  if (!user.address) redirect('/shipping-address')
-  if (!user.paymentMethod) redirect('/payment-method')
+
+   const isShippingAddress = (address: any): address is ShippingAddress => {
+     return (
+       typeof address.fullName === 'string' &&
+       typeof address.streetAddress === 'string' &&
+       typeof address.city === 'string' &&
+       typeof address.country === 'string' &&
+       (typeof address.postalCode === 'undefined' ||
+         typeof address.postalCode === 'string') &&
+       (typeof address.lat === 'undefined' ||
+         typeof address.lat === 'number') &&
+       (typeof address.lng === 'undefined' || typeof address.lng === 'number')
+     )
+   }
+
+     const validatedAddress =
+       user?.address && isShippingAddress(user.address) ? user.address : null
+
+
+  if (!user) {
+    redirect('/login')
+    return null
+  }
+
+  if (!user.address) {
+    redirect('/shipping-address')
+    return null
+  }
+
+  if (!user.paymentMethod) {
+    redirect('/payment-method')
+    return null
+  }
 
   return (
     <>
@@ -26,10 +56,10 @@ export default async function PlaceOrderPage() {
           <Card>
             <CardContent className="p-4 gap-4">
               <h2 className="text-xl pb-4">Shipping Address</h2>
-              <p>{user.address.fullName}</p>
+              <p>{validatedAddress?.fullName}</p>
               <p>
-                {user.address.streetAddress}, {user.address.city},{' '}
-                {user.address.postalCode}, {user.address.country}{' '}
+                {validatedAddress?.streetAddress}, {validatedAddress?.city},{' '}
+                {validatedAddress?.postalCode}, {validatedAddress?.country}{' '}
               </p>
               <div>
                 <Link href="/shipping-address">
@@ -50,13 +80,10 @@ export default async function PlaceOrderPage() {
             </CardContent>
           </Card>
           <PlaceOrderTable />
-          
         </div>
 
-        <PlaceOrder/>
+        <PlaceOrder />
       </div>
-
-      
     </>
   )
 }

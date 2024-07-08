@@ -13,7 +13,7 @@ const PaymentMethodPage = async () => {
   const session = await currentUser()
     if (!session || !session.id) return redirect('/login')
   const user = await getUserById(session?.id)
-  console.log(user)
+  //console.log(user)
   return <PaymentMethodForm preferredPaymentMethod={user?.paymentMethod} />
 }
 

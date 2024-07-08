@@ -7,10 +7,11 @@ import type { z } from 'zod'
 import { shippingAddressSchema, paymentMethodSchema } from '@/schemas'
 
 import { formatError } from '@/lib/utils'
-import { auth, signIn, signOut } from '@/auth'
+import { auth} from '@/auth'
 import { currentUser } from '@/lib/auth'
 import { ShippingAddress } from '@/types'
 import { getSession } from 'next-auth/react'
+
 
 
 
@@ -60,15 +61,15 @@ export const updateUserAddress = async (
 ) => {
   try {
     const session = await auth()
-    const currentUser = await prisma.user.findUnique({
+    const currentUserr = await prisma.user.findUnique({
       where: { id: session?.user?.id },
     })
-    if (!currentUser) throw new Error('User not found')
+    if (!currentUserr) throw new Error('User not found')
 
     const address = shippingAddressSchema.parse(values)
 
     await prisma.user.update({
-      where: { id: currentUser.id },
+      where: { id: currentUserr.id },
       data: { address },
     })
     revalidatePath('/place-order')

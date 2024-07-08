@@ -1,6 +1,7 @@
 import * as z from 'zod'
 import { UserRole } from '@prisma/client'
 import { PAYMENT_METHODS } from '@/constants/constant'
+import { formatNumberWithDecimal } from '@/lib/utils'
 
 export const SettingsSchema = z
   .object({
@@ -230,7 +231,10 @@ export const cartItemSchema = z.object({
   productId: z.string().min(1, 'Product is required'),
   name: z.string().min(1, 'Name is required'),
   slug: z.string().min(1, 'Slug is required'),
-  quantity: z.number().int().nonnegative('Quantity must be a non-negative number'),
+  quantity: z
+    .number()
+    .int()
+    .nonnegative('Quantity must be a non-negative number'),
   image: z.string().min(1, 'Image is required'),
   price: z
     .number()
@@ -239,3 +243,17 @@ export const cartItemSchema = z.object({
       'Price must have exactly two decimal places (e.g., 49.99)'
     ),
 })
+
+export const CartSchema = z.object({
+  id: z.string().uuid(),
+  userId: z.string(), // nullable to match the foreign key that could be null
+  sessionCartId: z.string(),
+  items: z.array(cartItemSchema).default([]),
+  // itemsPrice: z.number(),
+  // shippingPrice: z.number(),
+  // taxPrice: z.number(),
+  totalPrice: z.number(),
+  createdAt: z.date().default(new Date()),
+})
+
+

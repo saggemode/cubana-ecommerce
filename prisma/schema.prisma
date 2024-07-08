@@ -62,10 +62,11 @@ model User {
   image         String?   @db.Text
   password      String?   @db.Text
 
-  isBanned         Boolean   @default(false)
-  wishlist         Product[] @relation("Wishlist")
+  isBanned         Boolean    @default(false)
+  wishlist         Product[]  @relation("Wishlist")
   accounts         Account[]
-  cart             Cart[]
+  cartItems        CartItem[]
+  //cart             Cart[]
   orders           Order[]
   reviews          Review[]
   stripeCustomerId String?
@@ -139,27 +140,6 @@ model Category {
   title    String    @unique
   // description String?
   products Product[] @relation("CategoryToProduct")
-
-  createdAt DateTime @default(now())
-  updatedAt DateTime @updatedAt
-}
-
-model Cart {
-  id        String     @id @default(cuid())
-  userId    String     @unique
-  user      User       @relation(fields: [userId], references: [id], onDelete: Cascade)
-  cartItems CartItem[]
-  createdAt DateTime   @default(now())
-  updatedAt DateTime   @updatedAt
-}
-
-model CartItem {
-  id        String  @id @default(cuid())
-  cartId    String
-  productId String
-  quantity  Int
-  cart      Cart    @relation(fields: [cartId], references: [id], onDelete: Cascade)
-  product   Product @relation(fields: [productId], references: [id], onDelete: Cascade)
 
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
@@ -251,22 +231,50 @@ model Size {
   updatedAt DateTime  @updatedAt
 }
 
-model Order {
-  id              String  @id @default(cuid())
-  sessionId       String
-  orderNumber     String  @unique
-  idempotencyKey  String?
-  paymentIntentId String  @unique
-  amountTotal     Int
+// model Cart {
+//   id            String  @id @default(cuid())
+//   userId        String  @unique
+//   sessionCartId String?
+//   //items         Json    @default("[]")
+//   totalPrice    Int?
+//   shippingPrice Int?
+//   taxPrice      Int?
 
+//   user      User       @relation(fields: [userId], references: [id], onDelete: Cascade)
+//   items     CartItem[]
+//   createdAt DateTime   @default(now())
+//   updatedAt DateTime   @updatedAt
+// }
+
+model CartItem {
+  id        String @id @default(cuid())
+  //cartId    String
+  productId String
+  quantity  Int  @default(1)
+  userId    String
+
+  //cart    Cart    @relation(fields: [cartId], references: [id], onDelete: Cascade)
+  user    User    @relation(fields: [userId], references: [id])
+  product Product @relation(fields: [productId], references: [id], onDelete: Cascade)
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@unique([userId, productId], name: "UniqueCartItem")
+}
+
+model Order {
+  id              String          @id @default(cuid())
+  sessionId       String?
+  orderNumber     String?         @unique
+  idempotencyKey  String?
+  paymentIntentId String?         @unique
+  amountTotal     Int
+  discount        Float           @default(0)
   status          OrderStatusEnum @default(Processing)
-  shippingAddress Json
+  shippingAddress Json?
   paymentMethod   String
   paymentResult   Json?
-  itemsPrice      Decimal
-  //shippingPrice   Decimal
-  //taxPrice        Decimal
-  totalPrice      Decimal
   isPaid          Boolean         @default(false)
   paidAt          DateTime?
   isDelivered     Boolean         @default(false)
@@ -276,8 +284,8 @@ model Order {
   userId String
   user   User   @relation(fields: [userId], references: [id], onDelete: Cascade)
 
-  customerInformationId String
-  customerInformation   CustomerInformation @relation(fields: [customerInformationId], references: [id])
+  // customerInformationId String
+  // customerInformation   CustomerInformation @relation(fields: [customerInformationId], references: [id])
 
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
@@ -286,11 +294,9 @@ model Order {
 // Intermediary for a many-to-many relationship
 model OrderItem {
   id       String @id @default(cuid())
-  quantity Int
+  quantity Int?
   price    Int
-  name     String
-  slug     String
-  image    String
+  count    Int?
 
   orderId String
   order   Order  @relation(fields: [orderId], references: [id])
@@ -317,19 +323,19 @@ model CheckoutSession {
   updatedAt  DateTime      @updatedAt
 }
 
-model CustomerInformation {
-  id           String   @id @default(cuid())
-  name         String
-  addressLine1 String
-  addressLine2 String
-  city         String
-  state        String
-  // country      String
-  // postalCode   String
-  createdAt    DateTime @default(now())
-  updatedAt    DateTime @updatedAt
-  Order        Order[]
-}
+// model CustomerInformation {
+//   id           String   @id @default(cuid())
+//   name         String
+//   addressLine1 String
+//   addressLine2 String
+//   city         String
+//   state        String
+//   // country      String
+//   // postalCode   String
+//   createdAt    DateTime @default(now())
+//   updatedAt    DateTime @updatedAt
+//   Order        Order[]
+// }
 
 enum OrderStatusEnum {
   Processing

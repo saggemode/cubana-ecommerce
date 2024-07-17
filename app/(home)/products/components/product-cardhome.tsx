@@ -136,6 +136,7 @@ const ProductCardHome: React.FC<ProductCardProps> = ({ productData }) => {
               ) : (
                 <MdRemoveShoppingCart className="w-4 h-4" />
               )}
+              remove
             </Button>
           ) : (
             <Button
@@ -162,7 +163,7 @@ const ProductCardHome: React.FC<ProductCardProps> = ({ productData }) => {
               ) : (
                 <MdAddShoppingCart />
               )}
-              Add to cart
+              Add 
             </Button>
           )}
           {/* <Button

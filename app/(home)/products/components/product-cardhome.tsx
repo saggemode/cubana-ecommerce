@@ -19,6 +19,8 @@ import { delayScroll } from '@/lib/scroll'
 import { useRouter } from 'next/navigation'
 import Price from '@/components/price'
 import { Button } from '@/components/ui/button'
+import AddToCart from './AddToCart'
+import { convertDocToObj } from '@/lib/utils'
 
 interface ProductCardProps {
   productData: Product
@@ -31,39 +33,10 @@ const ProductCardHome: React.FC<ProductCardProps> = ({ productData }) => {
   const [isPending, startTransition] = useTransition()
   const [quantity, setQuantity] = useState<number>(1)
 
-  const existItem =
-    cart && cart.cartItems.find((x) => x.item.id === productData.id)
 
   const handleClick = () => {
     router.push(`/products/${productData?.id}`)
   }
-
-  //    const [productQuantity, setProductQuantity] = useState(0)
-
-  //    useEffect(() => {
-  //      setProductQuantity(quantity ?? 0)
-  //    }, [quantity])
-
-  //    const { label, Icon, onClick } = productQuantity
-  //      ? {
-  //          label: 'Remove',
-  //          Icon: MdRemoveShoppingCart,
-  //          onClick: cart.removeItem(productData.id),
-  //        }
-  //      : {
-  //          label: 'Add',
-  //          Icon: MdAddShoppingCart,
-  //          onClick: cart.addItem({
-  //            item: productData,
-  //            quantity,
-  //          }),
-  //        }
-
-  //    const handleClick = (e?: React.MouseEvent<HTMLButtonElement>): void => {
-  //      e?.stopPropagation()
-  //      e?.preventDefault()
-  //      onClick()
-  //    }
 
   return (
     <>
@@ -91,7 +64,6 @@ const ProductCardHome: React.FC<ProductCardProps> = ({ productData }) => {
               {productData.name}
             </p>
             <p className="font-bold">
-              {' '}
               {productData?.isFeatured ? (
                 <Price
                   amount={
@@ -109,12 +81,24 @@ const ProductCardHome: React.FC<ProductCardProps> = ({ productData }) => {
             <p className="flex items-center gap-1 text-sm font-light">
               <i className="text-yellow-400">
                 <RiStarSFill />
-              </i>{' '}
+              </i>
               {'rate'} | Sold {'7'}
             </p>
           </div>
         </div>
-        <div className="absolute bottom-2 right-2">
+        {productData.stock !== 0 && (
+          <div className="absolute bottom-2 right-2">
+            <AddToCart
+              item={{
+                ...convertDocToObj(productData),
+                quantity: 0,
+                color: '',
+                size: '',
+              }}
+            />
+          </div>
+        )}
+        {/* <div className="absolute bottom-2 right-2">
           {existItem ? (
             <Button
               type="button"
@@ -166,13 +150,8 @@ const ProductCardHome: React.FC<ProductCardProps> = ({ productData }) => {
               Add 
             </Button>
           )}
-          {/* <Button
-            className="border border-transparent text-sm group-hover:border-border-secondary"
-            label={label}
-            Icon={Icon}
-            onClick={handleClick}
-          /> */}
-        </div>
+         
+        </div> */}
       </div>
     </>
   )

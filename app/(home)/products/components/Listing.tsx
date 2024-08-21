@@ -10,9 +10,9 @@ import { Empty } from '@/components/ui/empty'
 import type { QueryType } from './aside'
 import { useRouter } from 'next/router'
 import ProductCardHome from './product-cardhome'
+
 interface ProductListProps {
   allProducts: Product[]
-  //items: SafeProduct[]
 }
 
 export const Listing: React.FC<ProductListProps> = ({ allProducts }) => {
@@ -20,21 +20,6 @@ export const Listing: React.FC<ProductListProps> = ({ allProducts }) => {
   const [currentCategory, setCurrentCategory] = useState<string | null>(null)
   const [searchQuery, setSearchQuery] = useState('')
   const productsNotFound = allProducts.length === 0
-
-//   const {
-//     isReady,
-//     pathname,
-//     query: { search, category },
-//   } = useRouter() as QueryType
-
-//   useEffect(() => {
-//     if (!isReady) setIsLoading(true)
-//     else {
-//       const timeoutId = setTimeout(() => setIsLoading(false), 500)
-//       return () => clearTimeout(timeoutId)
-//     }
-//   }, [isReady])
-
 
   return (
     <motion.div
@@ -45,7 +30,7 @@ export const Listing: React.FC<ProductListProps> = ({ allProducts }) => {
           !isLoading && !productsNotFound,
       })}
       //    {...setTransition({ direction: isMobile ? 'bottom' : 'right' })}
-    //   key={isLoading ? null : key}
+      //   key={isLoading ? null : key}
     >
       {isLoading ? (
         <Loading />

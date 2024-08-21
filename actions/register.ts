@@ -1,9 +1,11 @@
 'use server'
 
+import config from '@/config/site'
 import * as z from 'zod'
 import bcrypt from 'bcryptjs'
-
+import { render } from '@react-email/render'
 import prisma from '@/lib/prisma'
+import Mail from '@/emails/verify'
 import { RegisterSchema } from '@/schemas'
 import { getUserByEmail } from '@/data/user'
 // import { sendVerificationEmail } from "@/lib/mail";
@@ -39,17 +41,16 @@ export const register = async (values: z.infer<typeof RegisterSchema>) => {
     },
   })
 
-  // const verificationToken = await generateVerificationToken(email);
-  // await sendVerificationEmail(
-  //   verificationToken.email,
-  //   verificationToken.token,
-  // );
-
   const verificationToken = await generateVerificationToken(email)
   const confirmLink = `http://localhost:3000/auth/new-verification?token=${verificationToken.token}`
 
-  const body = compileActivationTemplate(name, confirmLink)
-  await sendMail({ to: email, subject: 'Activate your Account', body: body })
-
+  //const body = compileActivationTemplate(name, confirmLink)
+  // await sendMail({ to: email, subject: 'Activate your Account', body: body })
+  await sendMail({
+    name: config.name,
+    to: email,
+    subject: 'Activate your Account',
+    body: render(Mail({ code: confirmLink, name: config.name })),
+  })
   return { success: 'Confirmation email sent!' }
 }

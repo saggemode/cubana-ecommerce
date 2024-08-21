@@ -3,29 +3,29 @@ import type { ReactNode } from 'react';
 
 type MainLayoutProps = {
   className?: string;
-  title: string;
-  url?: string;
-  description: string;
-  image: string;
+  // title: string;
+  // url?: string;
+  // description: string;
+  // image: string;
   children: ReactNode;
   product?: boolean;
 };
 
 export function MainLayout({
   className,
-  title,
-  url,
-  description,
-  image,
+  // title,
+  // url,
+  // description,
+  // image,
   children
 }: MainLayoutProps): JSX.Element {
-  const siteTitle = title;
-  const siteDescription = description;
-  const siteImage = image;
+  // const siteTitle = title;
+  // const siteDescription = description;
+  // const siteImage = image;
 
   return (
     <main className={className}>
-      <Head>
+      {/* <Head>
         <title>{siteTitle}</title>
         <meta name='og:title' content={siteTitle} />
         <meta name='description' content={siteDescription} />
@@ -35,7 +35,7 @@ export function MainLayout({
           name='og:url'
           content={`https://adil.vercel.app${url ?? ''}`}
         />
-      </Head>
+      </Head> */}
       {children}
     </main>
   );

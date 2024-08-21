@@ -1,5 +1,6 @@
 'use client'
 
+import React, { useEffect, useState } from 'react'
 import useCart from '@/hooks/use-cart'
 import { Button } from '@/components/ui/button'
 import { MinusCircle, PlusCircle, Trash } from 'lucide-react'
@@ -16,17 +17,21 @@ import {
 } from '@/components/ui/table'
 import Image from 'next/image'
 import Link from 'next/link'
+import useCartService from '@/hooks/use-cart'
+import { useRouter } from 'next/navigation'
 
 const PlaceOrderTable = () => {
-  const cart = useCart()
-  // const items = useCart.useCartItems
-  const { removeItem, increaseQuantity, decreaseQuantity } = useCart()
+  const [mounted, setMounted] = useState(false)
+  const router = useRouter()
+  const { items, itemsPrice } = useCartService()
 
-  const total = cart.cartItems.reduce(
-    (acc, cartItem) => acc + (cartItem.item.price ?? 0) * cartItem.quantity,
-    0
-  )
-  const totalRounded = parseFloat(total.toFixed(2))
+  useEffect(() => {
+    setMounted(true)
+  }, [items, itemsPrice])
+
+  const totalRounded = parseFloat(itemsPrice.toFixed(2))
+
+  if (!mounted) return <>Loading...</>
 
   return (
     <Card>
@@ -41,23 +46,23 @@ const PlaceOrderTable = () => {
             </TableRow>
           </TableHeader>
           <TableBody>
-            {cart.cartItems.map((cartItem, index) => (
+            {items.map((cartItem, index) => (
               <TableRow key={index}>
                 <TableCell>
                   <Link
-                    href={`/products/${cartItem.item.id}`}
+                    href={`/products/${cartItem.id}`}
                     className="flex items-center"
                   >
                     <div className="flex items-center">
                       <Image
-                        src={cartItem.item.images[0].url}
+                        src={cartItem.images[0].url}
                         width={50}
                         height={50}
                         className="rounded-lg w-32 h-32 object-cover"
                         alt="product"
                       />
                       <div className="flex flex-col gap-3 ml-4">
-                        <p className="text-body-bold">{cartItem.item.name}</p>
+                        <p className="text-body-bold">{cartItem.name}</p>
                         {/* {cartItem.color && (
                       <p className="text-small-medium">{cartItem.color}</p>
                     )}
@@ -66,38 +71,18 @@ const PlaceOrderTable = () => {
                     )} */}
                         {/* <p className="text-small-medium">${cartItem.item.price}</p> */}
 
-                        <p>
-                          <Price
-                            amount={
-                              cartItem.item.price !== null
-                                ? cartItem.item.price.toString()
-                                : ''
-                            }
-                          />
-                        </p>
+                        <p></p>
                       </div>
                     </div>
                   </Link>
                 </TableCell>
+
+                <TableCell>{cartItem.quantity}</TableCell>
                 <TableCell>
-                  <span className="px-2">
-                    <div className="flex gap-4 items-center">
-                      <MinusCircle
-                        className="hover:text-red-1 cursor-pointer"
-                        onClick={() => decreaseQuantity(cartItem.item.id)}
-                      />
-                      <p className="text-body-bold">{cartItem.quantity}</p>
-                      <PlusCircle
-                        className="hover:text-red-1 cursor-pointer"
-                        onClick={() => increaseQuantity(cartItem.item.id)}
-                      />
-                    </div>
-                  </span>
-                </TableCell>
-                <TableCell className="text-right">
-                  <Trash
-                    className="hover:text-red-1 cursor-pointer"
-                    onClick={() => removeItem(cartItem.item.id)}
+                  <Price
+                    amount={
+                      cartItem.price !== null ? cartItem.price.toString() : ''
+                    }
                   />
                 </TableCell>
               </TableRow>

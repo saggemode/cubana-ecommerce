@@ -1,4 +1,8 @@
+'use server'
+
+import { cache } from 'react'
 import prisma from '@/lib/prisma'
+import { Prisma } from '@prisma/client'
 import type { z } from 'zod'
 import slugify from 'slugify'
 import { NextResponse } from 'next/server'
@@ -8,7 +12,8 @@ import {
   deleteProductActionSchema,
   updateProductStatusActionSchema,
 } from '@/schemas'
-import type { Product } from '@prisma/client'
+import { Product } from '@/types'
+// import type { Product } from '@prisma/client'
 
 interface IParams {
   productId?: string
@@ -42,6 +47,166 @@ class ProductService {
       throw new Error(error)
     }
   }
+
+  // ............start new functions...................
+
+  static getLatest = cache(async () => {
+    const products = await prisma.product.findMany({
+      orderBy: {
+        id: 'desc',
+      },
+      take: 8,
+    })
+    return products
+  })
+
+  static getTopRated = cache(async () => {
+    const products = await prisma.product.findMany({
+      orderBy: {
+        rating: 'desc',
+      },
+      take: 8,
+    })
+    return products
+  })
+
+  static getFeatured = async () => {
+    const products = await prisma.product.findMany({
+      where: {
+        isFeatured: true,
+      },
+      include: {
+        images: true,
+      },
+      orderBy: { createdAt: 'desc' },
+      take: 3,
+    })
+    return products
+  }
+
+  static getBySlug = cache(async (slug: string) => {
+    const product = await prisma.product.findFirst({
+      where: {
+        slug: slug,
+      },
+    })
+    return product
+  })
+
+  static getByQuery = cache(
+    async ({
+      q,
+      category,
+      sort,
+      price,
+      rating,
+      page = '1',
+    }: {
+      q: string
+      category: string
+      price: string
+      rating: string
+      sort: string
+      page: string
+    }) => {
+      const PAGE_SIZE = 3
+
+      // Ensure the correct type is used for the name filter
+      const queryFilter: Prisma.ProductWhereInput =
+        q && q !== 'all' ? { name: { contains: q, mode: 'insensitive' } } : {}
+
+      const categoryFilter: Prisma.ProductWhereInput =
+        category && category !== 'all' ? { categoryId: category } : {}
+
+      const ratingFilter: Prisma.ProductWhereInput =
+        rating && rating !== 'all' ? { rating: { gte: Number(rating) } } : {}
+
+      const priceFilter: Prisma.ProductWhereInput =
+        price && price !== 'all'
+          ? {
+              price: {
+                gte: Number(price.split('-')[0]),
+                lte: Number(price.split('-')[1]),
+              },
+            }
+          : {}
+
+      //  const orderBy: Prisma.ProductOrderByWithRelationInput = (() => {
+      //    if (sort === 'lowest') return { price: 'asc' }
+      //    if (sort === 'highest') return { price: 'desc' }
+      //    if (sort === 'toprated') return { rating: 'desc' }
+      //    return { id: 'desc' }
+      //  })()
+
+      const orderBy: Prisma.ProductOrderByWithRelationInput = (() => {
+        if (sort === 'lowest') return { price: 'asc' }
+        if (sort === 'highest') return { price: 'desc' }
+        if (sort === 'toprated') return { rating: 'desc' }
+        return { id: 'desc' }
+      })()
+
+      const products = await prisma.product.findMany({
+        where: {
+          ...queryFilter,
+          ...categoryFilter,
+          ...priceFilter,
+          ...ratingFilter,
+        },
+        orderBy,
+        skip: PAGE_SIZE * (Number(page) - 1),
+        take: PAGE_SIZE,
+        select: {
+          id: true,
+          name: true,
+          price: true,
+          category: true,
+          rating: true,
+          images:true,
+          slug: true,
+        },
+      })
+
+      const countProducts = await prisma.product.count({
+        where: {
+          ...queryFilter,
+          ...categoryFilter,
+          ...priceFilter,
+          ...ratingFilter,
+        },
+      })
+
+      const categories = await prisma.product.findMany({
+        distinct: ['categoryId'],
+        select: { category: true },
+      })
+
+      return {
+        products,
+        countProducts,
+        page,
+        pages: Math.ceil(countProducts / PAGE_SIZE),
+        categories: categories.map((c) => c.category),
+      }
+    }
+  )
+
+  // static getCategories = cache(async () => {
+  //   const categories = await prisma.product.findMany({
+  //     distinct: ['categoryId'],
+  //     select: { category: true },
+  //   })
+  //   return categories.map((c) => c.category)
+  // })
+
+  // ............end new functions...................
+
+  static getCategories = cache(async () => {
+    const categories = await prisma.product.findMany({
+      distinct: ['categoryId'],
+      select: { category: true },
+    })
+    return categories.map((c) => c.category?.title) 
+  })
 
   static async findProduct(params: IParams) {
     try {

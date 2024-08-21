@@ -1,5 +1,6 @@
 'use client'
 
+import { useEffect } from 'react'
 import { updateUserPaymentMethod } from '@/actions/services/userService'
 import CheckoutSteps from '@/components/checkout-steps'
 import { Button } from '@/components/ui/button'
@@ -19,7 +20,9 @@ import { zodResolver } from '@hookform/resolvers/zod'
 import { ArrowRight, Loader } from 'lucide-react'
 import { useRouter } from 'next/navigation'
 import { useTransition } from 'react'
+import Cookies from 'js-cookie'
 import { useForm } from 'react-hook-form'
+import useCartService from '@/hooks/use-cart'
 import { z } from 'zod'
 
 export default function PaymentMethodForm({
@@ -28,6 +31,11 @@ export default function PaymentMethodForm({
   preferredPaymentMethod: string | null
 }) {
   const router = useRouter()
+
+  //const cart = useCart()
+
+  // const { savePaymentMethod } = useCart()
+  const { savePaymentMethod, paymentMethod, shippingAddress } = useCartService()
 
   const form = useForm<z.infer<typeof paymentMethodSchema>>({
     resolver: zodResolver(paymentMethodSchema),
@@ -51,9 +59,19 @@ export default function PaymentMethodForm({
         })
         return
       }
+
+      //Cookies.set('cart', JSON.stringify({ savePaymentMethod: { ...values } }))
+      // cart.savePaymentMethod(values.type)
+      savePaymentMethod(values.type)
       router.push('/place-order')
     })
   }
+
+  useEffect(() => {
+    if (!shippingAddress) {
+      return router.push('/shipping-address')
+    }
+  }, [router, shippingAddress])
 
   return (
     <>
@@ -77,7 +95,7 @@ export default function PaymentMethodForm({
                         onValueChange={field.onChange}
                         className="flex flex-col space-y-2"
                       >
-                        {PAYMENT_METHODS.map((paymentMethod: any) => (
+                        {PAYMENT_METHODS.map((paymentMethod) => (
                           <FormItem
                             key={paymentMethod}
                             className="flex items-center space-x-3 space-y-0"

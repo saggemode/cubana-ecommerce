@@ -1,11 +1,16 @@
+import { Metadata } from 'next'
 import prisma from '@/lib/prisma'
 import { redirect } from 'next/navigation'
 import { currentRole } from '@/lib/auth'
 import { ProductForm } from '../_components/product-form'
 import { ScrollArea } from '@/components/ui/scroll-area'
+import { APP_NAME } from '@/constants/constant'
+
+export const metadata: Metadata = {
+  title: `Update product - ${APP_NAME}`,
+}
 
 const ProductIdPage = async ({ params }: { params: { productId: string } }) => {
-
   const product = await prisma.product.findUnique({
     where: {
       id: params.productId,

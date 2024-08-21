@@ -15,7 +15,7 @@ const ShippingPage = async () => {
   const isShippingAddress = (address: any): address is ShippingAddress => {
     return (
       typeof address.fullName === 'string' &&
-      typeof address.streetAddress === 'string' &&
+      typeof address.address === 'string' &&
       typeof address.city === 'string' &&
       typeof address.country === 'string' &&
       (typeof address.postalCode === 'undefined' ||
@@ -32,3 +32,23 @@ const ShippingPage = async () => {
 }
 
 export default ShippingPage
+
+
+// import { Metadata } from 'next'
+// import ShippingForm from './shipping-address-form'
+
+
+
+// export const metadata: Metadata = {
+//   title: 'Shipping',
+// }
+
+// const ShippingPage = async () => {
+//   return (
+//     <div>
+//       <ShippingForm />
+//     </div>
+//   )
+// }
+
+// export default ShippingPage

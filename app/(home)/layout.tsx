@@ -1,5 +1,4 @@
 import ClientOnly from '@/components/ClientOnly'
-import { Navbar } from './_components/navbar'
 import Footer from './_components/Footer'
 
 // import { Metadata } from 'next'
@@ -18,8 +17,7 @@ interface ProtectedLayoutProps {
 const ProtectedLayout = ({ children, modal }: ProtectedLayoutProps) => {
   return (
     <ClientOnly>
-      {/* <Navbar /> */}
-      <SiteHeader/>
+      <SiteHeader />
       <div className="px-[1.5rem] md:px-[3rem] lg:px-[3rem] xl:px-[4rem] 2xl:px-[6rem]">
         <main>{children}</main>
       </div>

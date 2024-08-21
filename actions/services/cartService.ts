@@ -105,12 +105,12 @@ export const addItemToCart = async (data: CartItem) => {
 
 
 export async function getMyCart() {
-  const sessionCartId = cookies().get('sessionCartId')?.value
+ 
   if (!sessionCartId) return undefined
   const session = await auth()
   const userId = session?.user.id
   const cart = await prisma.cart.findFirst({
-    where: userId ? { userId: userId } : { sessionCartId: sessionCartId },
+    where: userId ,
   })
   return cart
 }

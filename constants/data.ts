@@ -174,6 +174,12 @@ export const navItems: NavItem[] = [
     label: 'employee',
   },
   {
+    title: 'Orders',
+    href: '/dashboard/orders',
+    icon: 'employee',
+    label: 'orders',
+  },
+  {
     title: 'Profile',
     href: '/dashboard/profile',
     icon: 'profile',
@@ -185,6 +191,12 @@ export const navItems: NavItem[] = [
     href: '/dashboard/kanban',
     icon: 'kanban',
     label: 'kanban',
+  },
+  {
+    title: 'Login',
+    href: '/',
+    icon: 'login',
+    label: 'login',
   },
   {
     title: 'Login',

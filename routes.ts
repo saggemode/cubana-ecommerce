@@ -26,6 +26,17 @@ export const authRoutes = [
  * Routes that start with this prefix are used for API authentication purposes
  * @type {string}
  */
+
+export const protectedRoutes = [
+  '/shipping-address',
+  '/payment-method',
+  '/place-order',
+  '/profile',
+  '/order',
+  '/dashboard',
+]
+
+
 export const apiAuthPrefix = "/api/auth";
 
 /**

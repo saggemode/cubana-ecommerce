@@ -3,6 +3,9 @@ import { UserRole } from '@prisma/client'
 import { PAYMENT_METHODS } from '@/constants/constant'
 import { formatNumberWithDecimal } from '@/lib/utils'
 
+
+
+
 export const SettingsSchema = z
   .object({
     name: z.optional(z.string()),
@@ -175,7 +178,7 @@ const VariantSchema = z.object({
 
 export const shippingAddressSchema = z.object({
   fullName: z.string().min(3, 'Name must be at least 3 characters'),
-  streetAddress: z.string().min(3, 'Address must be at least 3 characters'),
+  address: z.string().min(3, 'Address must be at least 3 characters'),
   city: z.string().min(3, 'city must be at least 3 characters'),
   postalCode: z.string().optional(),
   country: z.string().min(3, 'Country must be at least 3 characters'),
@@ -212,7 +215,18 @@ export const insertReviewSchema = z.object({
 })
 
 export const insertOrderSchema = z.object({
+  userId: z.string(),
+  paymentMethod: z.string(),
   shippingAddress: shippingAddressSchema,
+  items: z.array(
+    z.object({
+      id: z.string(),
+      price: z.number(),
+      quantity: z.number(),
+    })
+  ),
+  itemsPrice: z.number(),
+  totalPrice: z.number(),
   paymentResult: z
     .object({
       id: z.string(),
@@ -256,4 +270,15 @@ export const CartSchema = z.object({
   createdAt: z.date().default(new Date()),
 })
 
+
+export const updateProfileSchema = z.object({
+  name: z.string().min(3, 'Name must be at least 3 characters'),
+  phone: z.string().min(11, 'Phone must be at least 11 characters'),
+  email: z.string().email().min(3, 'Email must be at least 3 characters'),
+})
+
+export const updateUserSchema = updateProfileSchema.extend({
+  id: z.string().min(1, 'Id is required'),
+  role: z.string().min(1, 'Role is required'),
+})
 

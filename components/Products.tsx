@@ -1,18 +1,16 @@
-import NoResults from "./no-results";
-import Link from "next/link";
-import { Product } from "@/types";
+import NoResults from './no-results'
+import Link from 'next/link'
+import { Product } from '@/types'
 
-import ProductCard from "./ProductCard";
-import { ImageSkeleton } from "./ui/icons";
+import ProductCard from './ProductCard'
+import { ImageSkeleton } from './ui/icons'
 //import { SafeProduct } from "@/type";
 
 interface ProductListProps {
   items: Product[]
-  //items: SafeProduct[]
 }
 
 export const ProductGrid: React.FC<ProductListProps> = ({ items }) => {
-  
   return (
     <div className="space-y-4">
       {items.length === 0 && <NoResults />}
@@ -22,8 +20,8 @@ export const ProductGrid: React.FC<ProductListProps> = ({ items }) => {
         ))}
       </div>
     </div>
-  );
-};
+  )
+}
 
 export const ProductSkeletonGrid = () => {
   return (
@@ -32,8 +30,8 @@ export const ProductSkeletonGrid = () => {
         <ProductSkeleton key={Math.random()} />
       ))}
     </div>
-  );
-};
+  )
+}
 
 export function ProductSkeleton() {
   return (
@@ -56,5 +54,44 @@ export function ProductSkeleton() {
         </div>
       </div>
     </Link>
-  );
+  )
+}
+
+
+
+const ProductItemSkeleton = () => {
+  return (
+    <div className="card mb-4 bg-base-300">
+      <div>
+        <div className="skeleton relative aspect-square h-full w-full" />
+      </div>
+      <div className="card-body">
+        <div className="skeleton mb-2 h-6 w-3/4" />
+        <div className="skeleton mb-2 h-4 w-1/2" />
+        <div className="skeleton mb-2 h-4 w-1/3" />
+        <div className="card-actions flex items-center justify-between">
+          <div className="skeleton h-8 w-20" />
+        </div>
+      </div>
+    </div>
+  )
+}
+
+export const ProductItemsSkeleton = ({
+  quantity,
+  name,
+}: {
+  quantity: number
+  name: string
+}) => {
+  return (
+    <div>
+      <h2 className="my-2 text-2xl md:my-4">{name}</h2>
+      <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 md:grid-cols-3 md:gap-6 lg:grid-cols-4">
+        {Array.from({ length: quantity }).map((_, i) => {
+          return <ProductItemSkeleton key={i} />
+        })}
+      </div>
+    </div>
+  )
 }

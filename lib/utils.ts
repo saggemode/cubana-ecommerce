@@ -21,9 +21,30 @@ export function formatId(id: string) {
   return `..${id.substring(id.length - 6)}`
 }
 
+export const formatId2 = (x: string) => {
+  return `..${x.substring(20, 24)}`
+}
+
+
+
+export const convertDocToObj = (doc: any) => {
+  doc.id = doc.id.toString()
+  return doc
+}
+
+
+export const delay = (ms: number) =>
+  new Promise((resolve) => setTimeout(resolve, ms))
+
+export const formatNumber22 = (x: number) => {
+  return x.toString().replace(/\B(?=(\d{3})+(?!\d))/g, ',')
+}
+
 // export function formatNumber(num: number) {
 //   return (num / 100).toFixed(2).toLocaleString()
 // }
+
+
 
 export function xor(a: boolean, b: boolean) {
   return a !== b
@@ -38,6 +59,22 @@ export const formatter = new Intl.NumberFormat('en-US', {
   currency: 'NGN',
   maximumFractionDigits: 2,
 })
+
+const CURRENCY_FORMATTER = new Intl.NumberFormat('en-US', {
+  currency: 'USD',
+  style: 'currency',
+  minimumFractionDigits: 2,
+})
+
+export function formatCurrency(amount: number | string | null) {
+  if (typeof amount === 'number') {
+    return CURRENCY_FORMATTER.format(amount)
+  } else if (typeof amount === 'string') {
+    return CURRENCY_FORMATTER.format(Number(amount))
+  } else {
+    return 'NaN'
+  }
+}
 
 export const formatPrice = (price: number) => {
   return new Intl.NumberFormat('en-US', {

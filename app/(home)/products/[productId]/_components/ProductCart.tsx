@@ -16,16 +16,15 @@ import { useToast } from '@/components/ui/use-toast'
 import { ToastAction } from '@/components/ui/toast'
 import { Button } from '@/components/ui/button'
 import { useRouter } from 'next/navigation'
+import AddToCart from './AddToCart'
+import { convertDocToObj } from '@/lib/utils'
 
 const ProductCart = ({ product }: any) => {
-  const cart = useCart()
-  const { toast } = useToast()
-  const router = useRouter()
   const [isPending, startTransition] = useTransition()
   const [quantity, setQuantity] = useState<number>(1)
 
-  const existItem = cart && cart.cartItems.find((x) => x.item.id === product.id)
- 
+  // const existItem = cart && cart.cartItems.find((x) => x.item.id === product.id)
+
   return (
     <motion.div className="w-full shrink-[1.25] lg:max-w-none xl:max-w-xs">
       <motion.div
@@ -44,142 +43,155 @@ const ProductCart = ({ product }: any) => {
           >
             <div className="col-span-2" />
             <div />
-            <div />
           </div>
         ) : (
-          <AnimatePresence mode="wait">
-            {existItem ? (
-              <motion.div
-                className="flex flex-col gap-4"
-                {...setTransition({ direction: 'top', distance: 25 })}
-                key={product.id}
-              >
-                <div className="flex items-center justify-center gap-1 inner:border-neutral-400">
-                  <Button
-                    type="button"
-                    variant="outline"
-                    disabled={isPending}
-                    onClick={() => {
-                      startTransition(async () => {
-                        const res = await cart.decreaseQuantity(product.id)
-                        toast({
-                          variant: res.success ? 'default' : 'destructive',
-                          description: res.message,
-                        })
-                        return
-                      })
-                    }}
-                  >
-                    {isPending ? (
-                      <Loader className="w-4 h-4  animate-spin" />
-                    ) : (
-                      <Minus className="w-4 h-4" />
-                    )}
-                  </Button>
-                  <input
-                    className="flex-1 rounded-lg border bg-background px-1 py-1
-                             text-center transition focus:ring-2 focus:ring-accent
-                             focus:ring-offset-4 focus:ring-offset-background"
-                    type="number"
-                    min={1}
-                    max={10_000}
-                    value={existItem.quantity}
-                    onChange={cart.handleProductQuantity(product.id)}
-                  />
-                  <Button
-                    type="button"
-                    variant="outline"
-                    disabled={isPending}
-                    onClick={() => {
-                      startTransition(async () => {
-                        const res = await cart.increaseQuantity(product.id)
-                        toast({
-                          variant: res.success ? 'default' : 'destructive',
-                          description: res.message,
-                        })
-                        return
-                      })
-                    }}
-                  >
-                    {isPending ? (
-                      <Loader className="w-4 h-4  animate-spin" />
-                    ) : (
-                      <Plus className="w-4 h-4" />
-                    )}
-                  </Button>
-                </div>
+          // <AnimatePresence mode="wait">
+          //   {existItem ? (
+          //     <motion.div
+          //       className="flex flex-col gap-4"
+          //       {...setTransition({ direction: 'top', distance: 25 })}
+          //       key={product.id}
+          //     >
+          //       <div className="flex items-center justify-center gap-1 inner:border-neutral-400">
+          //         <Button
+          //           type="button"
+          //           variant="outline"
+          //           disabled={isPending}
+          //           onClick={() => {
+          //             startTransition(async () => {
+          //               const res = await cart.decreaseQuantity(product.id)
+          //               toast({
+          //                 variant: res.success ? 'default' : 'destructive',
+          //                 description: res.message,
+          //               })
+          //               return
+          //             })
+          //           }}
+          //         >
+          //           {isPending ? (
+          //             <Loader className="w-4 h-4  animate-spin" />
+          //           ) : (
+          //             <Minus className="w-4 h-4" />
+          //           )}
+          //         </Button>
+          //         <input
+          //           className="flex-1 rounded-lg border bg-background px-1 py-1
+          //                    text-center transition focus:ring-2 focus:ring-accent
+          //                    focus:ring-offset-4 focus:ring-offset-background"
+          //           type="number"
+          //           min={1}
+          //           max={10_000}
+          //           value={existItem.quantity}
+          //           onChange={cart.handleProductQuantity(product.id)}
+          //         />
 
-                <Button
-                  type="button"
-                  variant="outline"
-                  disabled={isPending}
-                  onClick={() => {
-                    startTransition(async () => {
-                      const res = await cart.removeItem(product.id)
-                      toast({
-                        variant: res.success ? 'default' : 'destructive',
-                        description: res.message,
-                      })
-                      return
-                    })
-                  }}
-                >
-                  {isPending ? (
-                    <Loader className="w-4 h-4  animate-spin" />
-                  ) : (
-                    <MdRemoveShoppingCart className="w-4 h-4" />
-                  )}
-                </Button>
-              </motion.div>
-            ) : (
-              <motion.div
-                {...setTransition({
-                  direction: 'bottom',
-                  distance: 25,
-                })}
-                key={quantity}
-              >
-                <Button
-                  className="w-full"
-                  type="button"
-                  disabled={isPending}
-                  onClick={() => {
-                    startTransition(async () => {
-                      const res = await cart.addItem({
-                        item: product,
-                        quantity,
-                      })
-                      toast({
-                        variant: res.success ? 'default' : 'destructive',
-                        description: res.message,
-                      })
-                      return
+          //         {/* <select
+          //           className="flex-1 rounded-lg border bg-background px-1 py-1
+          //                    text-center transition focus:ring-2 focus:ring-accent
+          //                    focus:ring-offset-4 focus:ring-offset-background"
+          //           value={existItem.quantity}
+          //           onChange={(e) =>
+          //             handleProductQuantityChange(product.id, e.target.value)
+          //           }
+          //         >
+          //           {[...Array(existItem.item.stock)].map((_, x) => (
+          //             <option key={x + 1} value={x + 1}>
+          //               {x + 1}
+          //             </option>
+          //           ))}
+          //         </select> */}
+          //         <Button
+          //           type="button"
+          //           variant="outline"
+          //           disabled={isPending}
+          //           onClick={() => {
+          //             startTransition(async () => {
+          //               const res = await cart.increaseQuantity(product.id)
+          //               toast({
+          //                 variant: res.success ? 'default' : 'destructive',
+          //                 description: res.message,
+          //               })
+          //               return
+          //             })
+          //           }}
+          //         >
+          //           {isPending ? (
+          //             <Loader className="w-4 h-4  animate-spin" />
+          //           ) : (
+          //             <Plus className="w-4 h-4" />
+          //           )}
+          //         </Button>
+          //       </div>
 
-                      toast({
-                        description: `${product.name} added to the cart`,
-                        action: (
-                          <ToastAction
-                            className="bg-primary"
-                            onClick={() => router.push('/cart')}
-                            altText="Go to cart"
-                          >
-                            Go to cart
-                          </ToastAction>
-                        ),
-                      })
-                    })
-                  }}
-                >
-                  {isPending ? (
-                    <Loader className="animate-spin" />
-                  ) : (
-                    <MdAddShoppingCart />
-                  )}
-                  Add to cart
-                </Button>
-              </motion.div>
-            )}
-          </AnimatePresence>
+          //       <Button
+          //         type="button"
+          //         variant="outline"
+          //         disabled={isPending}
+          //         onClick={() => {
+          //           startTransition(async () => {
+          //             const res = await cart.removeItem(product.id)
+          //             toast({
+          //               variant: res.success ? 'default' : 'destructive',
+          //               description: res.message,
+          //             })
+          //             return
+          //           })
+          //         }}
+          //       >
+          //         {isPending ? (
+          //           <Loader className="w-4 h-4  animate-spin" />
+          //         ) : (
+          //           <MdRemoveShoppingCart className="w-4 h-4" />
+          //         )}
+          //       </Button>
+          //     </motion.div>
+          //   ) : (
+          //     <motion.div
+          //       {...setTransition({
+          //         direction: 'bottom',
+          //         distance: 25,
+          //       })}
+          //       key={quantity}
+          //     >
+          //       <Button
+          //         className="w-full"
+          //         type="button"
+          //         disabled={isPending}
+          //         onClick={() => {
+          //           startTransition(async () => {
+          //             const res = await cart.addItem({
+          //               item: product,
+          //               quantity,
+          //             })
+          //             toast({
+          //               variant: res.success ? 'default' : 'destructive',
+          //               description: res.message,
+          //             })
+          //             return
+
+          //           })
+          //         }}
+          //       >
+          //         {isPending ? (
+          //           <Loader className="animate-spin" />
+          //         ) : (
+          //           <MdAddShoppingCart />
+          //         )}
+          //         Add to cart
+          //       </Button>
+          //     </motion.div>
+          //   )}
+          // </AnimatePresence>
+
+          <AddToCart
+            item={{
+              //...convertDocToObj(product),
+              ...product,
+              quantity: 0,
+              color: '',
+              size: '',
+            }}
+          />
         )}
       </motion.div>
     </motion.div>

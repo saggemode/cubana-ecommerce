@@ -1,0 +1,88 @@
+import { auth } from '@/auth'
+import prisma  from '@/lib/prisma' // Adjust the path according to your setup
+
+export const GET = auth(async (req: any, res: any) => {
+  if (!req.auth || !req.auth.user?.isAdmin) {
+    return res.status(401).json({ message: 'unauthorized' })
+  }
+
+  try {
+    // Get counts
+    const ordersCount = await prisma.order.count()
+    const productsCount = await prisma.product.count()
+    const usersCount = await prisma.user.count()
+
+    // Calculate total sales
+    const orders = await prisma.order.findMany({
+      select: { totalPrice: true },
+    })
+    const ordersPrice = orders.reduce((sum, order) => sum + order.totalPrice, 0)
+
+    // Sales Data grouped by month
+    const salesData = await prisma.order.groupBy({
+      by: ['createdAt'],
+      _sum: {
+        totalPrice: true,
+      },
+      _count: {
+        _all: true,
+      },
+      orderBy: {
+        createdAt: 'asc',
+      },
+    })
+
+    // Format the sales data
+    const formattedSalesData = salesData.map((data) => ({
+      _id: data.createdAt.toISOString().slice(0, 7), // YYYY-MM
+      totalOrders: data._count._all,
+      totalSales: data._sum.totalPrice || 0,
+    }))
+
+    // Products data grouped by category
+    const productsData = await prisma.product.groupBy({
+      by: ['category'],
+      _count: {
+        category: true,
+      },
+      orderBy: {
+        category: 'asc',
+      },
+    })
+
+    // Format the products data
+    const formattedProductsData = productsData.map((data) => ({
+      _id: data.category,
+      totalProducts: data._count.category,
+    }))
+
+    // Users data grouped by month
+    const usersData = await prisma.user.groupBy({
+      by: ['createdAt'],
+      _count: {
+        _all: true,
+      },
+      orderBy: {
+        createdAt: 'asc',
+      },
+    })
+
+    // Format the users data
+    const formattedUsersData = usersData.map((data:any) => ({
+      _id: data.createdAt.toISOString().slice(0, 7), // YYYY-MM
+      totalUsers: data._count._all,
+    }))
+
+    return res.status(200).json({
+      ordersCount,
+      productsCount,
+      usersCount,
+      ordersPrice,
+      salesData: formattedSalesData,
+      productsData: formattedProductsData,
+      usersData: formattedUsersData,
+    })
+  } catch (err: any) {
+    return res.status(500).json({ message: err.message })
+  }
+})

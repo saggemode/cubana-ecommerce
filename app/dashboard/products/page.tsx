@@ -4,6 +4,12 @@ import BreadCrumb from '@/components/breadcrumb'
 import { ProductsClient } from './_components/client'
 import { formatPrice } from '@/lib/utils'
 import { ProductColumn } from './_components/columns'
+import { APP_NAME } from '@/constants/constant'
+import { Metadata } from 'next'
+
+export const metadata: Metadata = {
+  title: `Admin Products - ${APP_NAME}`,
+}
 
 const page = async () => {
   const breadcrumbItems = [

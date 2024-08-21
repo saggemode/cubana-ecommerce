@@ -1,18 +1,24 @@
 'use client'
 
-import useCart from '@/hooks/use-cart'
 import { Card, CardContent } from '@/components/ui/card'
 import Price from '@/components/price'
 import PlaceOrderForm from './PlaceOrderForm'
+import useCartService from '@/hooks/use-cart'
+import { useRouter } from 'next/navigation'
+import { useEffect, useState } from 'react'
 
 const PlaceOrder = () => {
-  const cart = useCart()
+  const [mounted, setMounted] = useState(false)
+  const router = useRouter()
+  const { items, itemsPrice } = useCartService()
 
-  const total = cart.cartItems.reduce(
-    (acc, cartItem) => acc + (cartItem.item.price ?? 0) * cartItem.quantity,
-    0
-  )
-  const totalRounded = parseFloat(total.toFixed(2))
+  useEffect(() => {
+    setMounted(true)
+  }, [items, itemsPrice])
+
+  const totalRounded = parseFloat(itemsPrice.toFixed(2))
+
+  if (!mounted) return <>Loading...</>
 
   return (
     <div>

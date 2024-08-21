@@ -1,5 +1,5 @@
 import { Icons } from '@/components/icons'
-import { shippingAddressSchema,  } from '@/schemas'
+import { shippingAddressSchema, paymentResultSchema } from '@/schemas'
 import type { z } from 'zod'
 import type {
   //CustomerInformation,
@@ -20,11 +20,13 @@ export interface CustomerInformation {
 }
 
 export interface ShippingAddress {
+  id: string
+  orderId: string
   fullName: string
-  streetAddress: string
+  address: string
   city: string
   country: string
-  postalCode?: string
+  postalCode: string
   lat?: number
   lng?: number
 }
@@ -34,31 +36,120 @@ export type Review = InferSelectModel<typeof Review> & {
   user?: { name: string }
 }
 
-export type Cart = InferSelectModel<typeof Cart>
+//export type Cart = InferSelectModel<typeof Cart>
 export type CartItem = z.infer<typeof cartItemSchema>
+export type PaymentResult = z.infer<typeof paymentResultSchema>
 
-export interface Product {
-  id: string
-  name: string
-  description: string | null
-  slug: string
-  price: number | null
-  discount: number | null
-  quantity?: number // Add the quantity property here
-  stock: number | null
-  rating: number | null
-  isFeatured: boolean
-  isArchived: boolean
-  isAvailable?: boolean // Optional
+export type Order = Prisma.OrderGetPayload<{
+  include: {
+    user: true
+    items: true
+    shippingAddress: true
+    paymentResult: true
+  }
+}>
 
-  //orders :   OrderItem[]
-  //customerInformation: CustomerInformation[];
-  images: Image[]
-  category?: Category | null
-  size?: Size | null
-  brand?: Brand | null
-  color?: Color | null
-}
+export type OrderItem = Prisma.OrderItemGetPayload<{
+  include: {
+    product: true
+  }
+}>
+
+export type Product = Prisma.ProductGetPayload<{
+  include: {
+    size: true
+    brand: true
+    images: true
+    color: true
+    category: true
+  }
+}>
+
+// export type Order = {
+//   id: string
+//   user?: {
+//     name: string | null
+//   }
+//   items: [OrderItem]
+//   shippingAddress: {
+//     fullName: string
+//     address: string
+//     city: string
+//     postalCode: string
+//     country: string
+//   }
+//   paymentMethod: string
+//   paymentResult?: { id: string; status: string; email_address: string }
+//   itemsPrice: number
+//   shippingPrice: number
+//   taxPrice: number
+//   totalPrice: number
+//   isPaid: boolean
+//   isDelivered: boolean
+//   paidAt?: DateTime
+//   deliveredAt?: DateTime
+//   createdAt: DateTime
+// }
+
+// export type OrderItem = {
+//   id: string
+//   name: string
+//   quantity: number
+//   image: string
+//   price: number
+//   color: string
+//   size: string
+// }
+
+export type ShippingAddress = Prisma.ShippingAddressGetPayload<{}>
+
+export type PaymentResult = Prisma.PaymentResultGetPayload<{}>
+
+// export interface OrderItem {
+//   id: string
+//   name: string
+//   description: string | null
+//   slug: string
+//   price: number | null
+//   discount: number | null
+//   quantity?: number // Add the quantity property here
+//   stock: number | null
+//   rating: number | null
+//   isFeatured: boolean
+//   isArchived: boolean
+//   isAvailable?: boolean // Optional
+
+//   //orders :   OrderItem[]
+//   //customerInformation: CustomerInformation[];
+//   images: Image[]
+//   category?: Category | null
+//   size?: Size | null
+//   brand?: Brand | null
+//   color?: Color | null
+// }
+
+// export interface Product {
+//   id: string
+//   name: string
+//   description: string | null
+//   slug: string
+//   price: number | null
+//   discount: number | null
+//   quantity?: number // Add the quantity property here
+//   stock: number | null
+//   rating: number | null
+//   isFeatured: boolean
+//   isArchived: boolean
+//   isAvailable?: boolean // Optional
+
+//   //orders :   OrderItem[]
+//   //customerInformation: CustomerInformation[];
+//   images: Image[]
+//   category?: Category | null
+//   size?: Size | null
+//   brand?: Brand | null
+//   color?: Color | null
+// }
 
 export interface IBreadcrumb {
   breadcrumb: string
@@ -134,6 +225,7 @@ export interface NavItem {
   icon?: keyof typeof Icons
   label?: string
   description?: string
+  children?:string
 }
 
 export interface NavItemWithChildren extends NavItem {

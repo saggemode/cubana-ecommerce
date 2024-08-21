@@ -16,7 +16,7 @@ const CartNav = () => {
         <CiShoppingCart />
       </div>
       <span className="absolute ml-2  top-[-10px] right-[-10px] bg-slate-700 text-white h-6 w-6 rounded-full flex items-center justify-center text-sm">
-        {cart?.cartItems.length}
+        {cart?.items.length}
       </span>
     </div>
   )

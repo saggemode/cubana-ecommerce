@@ -9,7 +9,7 @@ export async function sendMail({
   subject,
   body,
 }: {
-  name: string
+  name?: string
   to: string
   subject: string
   body: string

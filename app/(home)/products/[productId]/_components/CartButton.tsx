@@ -4,7 +4,7 @@ import { useState } from 'react'
 import useCart from '@/hooks/use-cart'
 import { Button } from '@/components/ui/button'
 import { LuShoppingCart } from 'react-icons/lu'
-import { Product } from '@/types'
+
 
 
 const CartButton = ({ product }:any) => {
@@ -13,7 +13,7 @@ const CartButton = ({ product }:any) => {
 
   const onAddToCart = () => {
     // addToCart(product);
-    cart.addItem({
+    cart.increase({
       item: product,
       quantity,
       // color: selectedColor,

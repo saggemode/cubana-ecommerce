@@ -1,4 +1,4 @@
-const Pagination = () => {
+const Paginations = () => {
   return (
     <div className="p-4 flex items-center justify-between text-gray-500">
       <button
@@ -21,4 +21,4 @@ const Pagination = () => {
   );
 };
 
-export default Pagination;
+export default Paginations;

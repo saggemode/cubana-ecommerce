@@ -10,8 +10,12 @@ import { RegisterSchema } from '@/schemas'
 import { getUserByEmail } from '@/data/user'
 // import { sendVerificationEmail } from "@/lib/mail";
 import { generateVerificationToken } from '@/lib/tokens'
-import { compileActivationTemplate } from '@/lib/node-mails'
+// import { compileActivationTemplate } from '@/lib/node-mails'
 import { sendMail } from '@/lib/node-mails'
+import { env } from '@/schemas/env-schema'
+
+
+
 
 export const register = async (values: z.infer<typeof RegisterSchema>) => {
   const validatedFields = RegisterSchema.safeParse(values)
@@ -42,7 +46,9 @@ export const register = async (values: z.infer<typeof RegisterSchema>) => {
   })
 
   const verificationToken = await generateVerificationToken(email)
-  const confirmLink = `http://localhost:3000/auth/new-verification?token=${verificationToken.token}`
+    const confirmLink = `${env.domain}/auth/new-verification?token=${verificationToken.token}`
+
+  // const confirmLink = `http://localhost:3000/auth/new-verification?token=${verificationToken.token}`
 
   //const body = compileActivationTemplate(name, confirmLink)
   // await sendMail({ to: email, subject: 'Activate your Account', body: body })
